@@ -1,9 +1,10 @@
 # Proximity
 
-A single-file attachment-style assessment. A candidate answers 18 items,
-gets plotted on two axes (anxiety / avoidance), then walks a 7-chapter
-journey that reveals the founder's coordinate and the predicted dynamic
-between the two.
+A single-file attachment-style assessment, written as something one person
+sends to someone they're interested in. She answers 18 questions, gets
+plotted on two axes (worry about being left / keeping yourself back), then
+turns through a short book that reveals his coordinate and what the two of
+them are likely to do to each other.
 
 ## Hard constraints — do not violate
 
@@ -62,13 +63,37 @@ like a SaaS onboarding flow, it is wrong.
   4.5:1. Same rule for the primary button: its rose gradient is deepened so
   the cream label clears 4.5:1 at the lightest stop.
 
+## Shape of the thing
+
+It reads like a book, not a page. Three screens: cover, questions, and the
+deck.
+
+- **The frame is pinned.** On `#quiz` and `#deck` the wrap is exactly one
+  viewport tall (`body[data-screen=...]`), the nav sits at the bottom, and
+  `#pageBody` / `#qcard` flex to fill and scroll *internally* if a page runs
+  long. Almost none do — only the four-corners grid needs a nudge, and it
+  gets a "there's a bit more" hint that appears only when a page actually
+  overflows.
+- **One idea per page.** `resultPages()` and `journeyPages()` each return
+  `{eyebrow, html, onShow?}`. Keep pages short enough to fit; if one starts
+  overflowing on a small phone, split it rather than shrinking the type.
+- **Turning a page** is `turn()` — it restarts the CSS animation by hand
+  (`animation:none` → reflow → `''`), sliding in from the direction of
+  travel. Advance with the buttons, arrow keys, space, or a swipe.
+  `overflow-x:clip` on the paged screens stops the incoming transform from
+  ever causing a horizontal pan.
+
 ## Architecture
 
 - `Q[]` — the 18 items. Each option carries `ax` (anxiety load) and
   `av` (avoidance load), range -2..+2.
 - `P{}` — the four style profiles. Copy lives here.
 - `PAIRS{}` — 10 pairwise dynamics, keyed by `pairKey()` (sorted, pipe-joined).
-- `CH[]` — the 7 journey chapters. Each has a `build()` returning an HTML string.
+- `GUT[]` — the rotating gut-check line shown under every question.
+- `resultPages()` / `journeyPages()` — the book. Each returns an array of
+  `{eyebrow, html, onShow?}`; `finish()` concatenates them into `DECK` and
+  `renderPage()` shows one at a time. `onShow` exists for the couple of pages
+  that have to touch their own DOM after render (the share page).
 - `FOUNDER{}` — the founder's fixed coordinate and personal note. Lives in the
   CONFIG section at the very top of `<script>`, ahead of everything else —
   that's the first thing anyone editing this file should see. Guarded by a
@@ -80,11 +105,13 @@ like a SaaS onboarding flow, it is wrong.
   though it's defined further down — function declarations are hoisted,
   unlike `let`/`const`.
 - `tally()` — normalises raw loads to 0–100 per axis.
-- `paintField()` — drives the signature two-orb visual.
+- `paintField()` — drives the signature two-rose visual.
+- `soloMap()` / `dualMap()` / `gridBase()` — the quadrant grid. Worry grows
+  *downward* (`py`), because ANXIOUS and BOTH are the lower two corners.
 - `encodeAnswers()` / `decodeAnswers()` — pack/unpack the 18-answer array into
   a version-tagged (`HASH_VERSION`), URL-safe base64 string for the
   shareable-link feature. A version mismatch or malformed string never
-  renders a result — it always falls back to a fresh intake with a visible
+  renders a result — it always falls back to the questions with a visible
   message. The decode check runs at the very end of the script, after
   `RESULT` is declared — calling it earlier hits the `let RESULT` temporal
   dead zone.
@@ -97,15 +124,20 @@ by name where a claim comes from their work. Never overstate the science —
 this is an informal adaptation of the ECR-R, not a clinical instrument, and
 the copy says so.
 
-Two registers, and the line between them matters:
+**Who is speaking.** The narrator is a woman talking to the person he's
+interested in. She refers to him in the third person ("he", and by
+`FOUNDER.name`) and to the reader as "you". Warm, funny, a bit direct — like
+a friend who happens to know the research. Light on jargon: an occasional
+"FYI" aside is right, a lecture is not. Nobody should have to go and look
+something up to follow a page.
 
-- **Chrome** (counters, eyebrows, buttons, the field caption) is warm and
-  low-key — "a small invitation", "01 of 18", "settling in", "where you
-  landed", "two people, one thread". Never "intake", "calibrating",
-  "candidate", "coordinate". This copy is design; change it freely.
-- **Prose** — the 18 items, the four profiles, the ten pairings, the seven
-  chapters, and the founder note — is the author's own writing. Do not
-  rewrite it as part of a design change.
+The one exception is `FOUNDER.note`, which stays in **his** first person. The
+narrator hands over to it explicitly ("I'll get out of the way for this bit")
+and takes the thread back afterwards. Don't rewrite that note — it's his.
+
+**Every question carries a gut-check line** (`GUT[]`, rotating). The test is
+only worth anything if she answers on instinct; the clever-sounding answer
+quietly ruins her own result. Never drop that nudge.
 
 ## Before you finish any task
 
