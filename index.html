@@ -595,6 +595,20 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
 }
 .quoted p{font-size:16px;line-height:1.72;color:var(--text-2);margin-bottom:13px}
 .quoted p:last-child{margin-bottom:0}
+
+/* Claude's one-time reflection on the free-text notes — see REFLECT
+   config + requestReflection()/showReflection() in the script. */
+.reflection{
+  margin-top:18px;padding:18px 20px;border-radius:20px;
+  border:1px solid var(--glass-brd);background:var(--glass);
+  -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
+  box-shadow:var(--elev-1), var(--ring);
+}
+.reflection p{font-size:15px;line-height:1.65;color:var(--text-2);margin-top:8px}
+.reflection p:first-child{margin-top:0}
+.reflection .eyebrow{color:var(--muted)}
+.reflection-status{font-style:italic;color:var(--muted);margin-top:0}
+.reflection a{color:var(--warm-ink)}
 .map--wide{width:100%;max-width:300px;height:auto}
 
 @media (prefers-reduced-motion:reduce){
@@ -618,6 +632,26 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
     --blur:saturate(112%) blur(9px);
     --blur-lg:saturate(115%) blur(14px);
   }
+}
+
+/* ── "download the pdf" — the browser's own print dialog, aimed at a
+   plain, ink-friendly rebuild of the deck. See downloadPdf() / buildPrintHtml()
+   in the script. Nothing here ever touches a network. ── */
+.print-only{display:none}
+@media print{
+  body > *:not(#printView){display:none!important}
+  #printView{display:block!important;max-width:640px;margin:0 auto;
+    color:#3a2a2c;background:#fff;font-family:var(--body)}
+  .pv-head{margin-bottom:28px;border-bottom:2px solid #3a2a2c;padding-bottom:14px}
+  .pv-head h1{font-family:var(--display);font-size:26px;margin:0 0 4px}
+  .pv-head p{font-family:var(--label);font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:#888;margin:0}
+  .pv-page{break-inside:avoid;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #ddd}
+  .pv-eyebrow{font-family:var(--label);font-size:10px;letter-spacing:.18em;
+    text-transform:uppercase;color:#888;margin-bottom:8px}
+  #printView *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    background:transparent!important;box-shadow:none!important;color:#3a2a2c!important}
+  #printView button,#printView .cta,#printView .nx,#printView .ghost{display:none!important}
 }
 </style>
 </head>
@@ -722,7 +756,7 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
 
     <p class="note rise d4">That’s the whole model. Everything else about how a person loves tends to follow from those two.</p>
     <p class="note rise d5"><b>Answer fast and answer honestly.</b> Not how you’d like to be, not how it sounds best — how you actually are. The clever-sounding answer is the one that ruins your own result, and you’re the only person who loses.</p>
-    <p class="note rise d5"><b>Nothing is saved or sent.</b> It all runs right here on your phone. Close the tab and it’s gone — unless you copy the link at the end, which keeps your answers inside the link itself and nowhere else.</p>
+    <p class="note rise d5"><b>Your answers stay on your phone.</b> All eighteen questions run right here — nothing saved, nothing sent, gone when you close the tab. The one exception: if you type something in the optional "your own words" box, that text gets sent once, at the end, to Claude, to write you a short reflection on it — then it's discarded. Skip that box and nothing ever leaves your phone at all.</p>
 
     <button class="cta rise d5" id="start">let’s go <span class="arw">→</span></button>
   </div>
@@ -770,6 +804,8 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
     </div>
   </div>
 </div>
+
+<div id="printView" class="print-only" aria-hidden="true"></div>
 
 <script>
 /* ══════════════════════════════════════════════════════════
@@ -824,6 +860,22 @@ const GUEST = {
 if (GUEST.code === "changeme"){
   console.warn('GUEST.code is still the placeholder "changeme" — set a real code before sending this link to anyone.');
 }
+
+/* ══════════════════════════════════════════════════════════
+   REFLECT — the one thing on this page that touches a network.
+   ══════════════════════════════════════════════════════════
+   Everything else in this app runs entirely on-device. The single
+   exception: if she uses the optional "in your own words" box, that
+   text is sent once, at the end, to /api/reflect (a tiny serverless
+   function — see api/reflect.js) which asks Claude for a short
+   reflection on it. Nothing is stored anywhere, on either end — the
+   request happens, the response gets shown once, that's the whole
+   lifecycle. If she never touches the free-text box, this never fires
+   and nothing ever leaves her phone, same as before.
+   `GATE_CODE` on the server must match `GUEST.code` above — update
+   both together when you change the code. */
+const REFLECT_ENDPOINT = '/api/reflect';
+const HOLIDAY_WHATSAPP = '27846084968';   // used only for the "couldn't reach Claude" fallback
 
 function codeMatches(input){
   return GUEST.active
@@ -1164,6 +1216,58 @@ function escapeHtml(s){
   return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+/* ── the reflection request: pure payload builder (testable without a
+   network call) + the actual fetch, kept separate on purpose ── */
+let reflectionState = 'idle';   // idle | pending | done | failed
+let reflectionText = '';
+let reflectionPromise = null;
+
+function buildReflectionPayload(extras){
+  return {
+    code: GUEST.code,
+    notes: extras.map(x => ({ q: x.q, a: x.a }))
+  };
+}
+
+function requestReflection(extras){
+  reflectionState = 'pending';
+  reflectionPromise = fetch(REFLECT_ENDPOINT, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(buildReflectionPayload(extras))
+  })
+    .then(r => r.ok ? r.json() : Promise.reject(new Error('bad status')))
+    .then(data => {
+      if (!data || typeof data.reflection !== 'string' || !data.reflection.trim()) throw new Error('empty');
+      reflectionText = data.reflection.trim();
+      reflectionState = 'done';
+    })
+    .catch(() => { reflectionState = 'failed'; });
+  return reflectionPromise;
+}
+
+/* onShow for the "in your own words" page — re-run every time the page
+   is (re)shown, so it always reflects the current state even if she
+   navigates back to it before or after the request settles */
+function showReflection(){
+  const box = el('reflectionBox');
+  if (!box) return;
+  const paint = () => {
+    if (reflectionState === 'done'){
+      box.innerHTML = `<div class="eyebrow">claude's take</div><p>${escapeHtml(reflectionText)}</p>`;
+    } else if (reflectionState === 'failed'){
+      box.innerHTML = `<div class="eyebrow">claude's take</div>
+        <p>Couldn't reach Claude just now, so no reflection this time — nothing else is affected.
+        If you want to talk any of this through, message Holiday on
+        <a href="https://wa.me/${HOLIDAY_WHATSAPP}" target="_blank" rel="noopener">WhatsApp</a>.</p>`;
+    } else {
+      box.innerHTML = `<p class="reflection-status">Getting Claude's take on this…</p>`;
+    }
+  };
+  paint();
+  if (reflectionState === 'pending' && reflectionPromise) reflectionPromise.then(paint);
+}
+
 function resultPages(p, anx, avo, extras){
   const pages = [
     { eyebrow:"where you landed", html:`
@@ -1222,6 +1326,11 @@ function resultPages(p, anx, avo, extras){
         <textarea id="shareLink" class="share-link" readonly onclick="this.select()"></textarea>
         <button class="copybtn" id="copyLink">copy the link</button>
         <span class="eyebrow copystatus" id="copyStatus"></span>
+      </div>
+      <div class="share">
+        <div class="eyebrow">the whole thing, as a pdf</div>
+        <p class="small" style="margin-top:8px">Every page, in order — your numbers, the full book, and your own words if you added any. Downloads straight to your device through your browser's own print dialog; nothing is uploaded anywhere to make this happen.</p>
+        <button class="copybtn" id="downloadPdf">download the pdf</button>
       </div>` },
 
     { eyebrow:"now the other half", html:`
@@ -1237,9 +1346,10 @@ function resultPages(p, anx, avo, extras){
   // words" later in the journey. Skipped entirely if she never used the box.
   if (extras && extras.length){
     pages.splice(pages.findIndex(pg => pg.eyebrow === "yours to keep"), 0, {
-      eyebrow:"in your own words", html:
+      eyebrow:"in your own words", onShow:showReflection, html:
         `<p class="note">You added a bit extra along the way — worth keeping.</p>
-        <div class="quoted">${extras.map(x=>`<p><b>${escapeHtml(x.q)}</b><br>${escapeHtml(x.a)}</p>`).join('')}</div>`
+        <div class="quoted">${extras.map(x=>`<p><b>${escapeHtml(x.q)}</b><br>${escapeHtml(x.a)}</p>`).join('')}</div>
+        <div class="reflection" id="reflectionBox"><p class="reflection-status">Getting Claude's take on this…</p></div>`
     });
   }
   return pages;
@@ -1394,7 +1504,7 @@ function journeyPages(){
     { eyebrow:"the ask", html:`
       <div class="pull">He told you what he is before you asked. Least he can do is find out what you'd need.</div>
       <p>That's everything. You now know his coordinate, yours, where both came from, and the exact loop you're most likely to fall into — which is a genuinely unusual place to start. Most people get this information by hurting each other for two years first.</p>
-      <p class="small" style="margin-top:18px">And one last time, because it matters: none of this was stored, sent or logged anywhere. It ran on your phone and it's gone when you close the tab. The only copy that exists is the one you choose to send.</p>
+      <p class="small" style="margin-top:18px">And one last time, because it matters: none of this was stored or logged anywhere. Your eighteen answers ran entirely on your phone. The only thing that ever left it was your own free-text notes, if you wrote any — sent once to get that reflection, then discarded, nowhere else. The only copy of any of this that exists is the one you choose to send.</p>
       <div class="chnav" style="border:none;margin-top:20px;padding-top:0">
         <button class="ghost" id="reReview">← back to my result</button>
       </div>` }
@@ -1661,6 +1771,10 @@ function finish(){
 
   const extras = Q.map((q,qi)=> OTHER[qi] ? {q:q.t, a:OTHER[qi]} : null).filter(Boolean);
 
+  // fire this off now, not when she reaches the page — by the time she's
+  // clicked through a few results pages the reflection is usually back
+  if (extras.length) requestReflection(extras);
+
   SUMMARY =
 `I did the closeness test.
 ─────────────────────────
@@ -1690,16 +1804,54 @@ function fillShare(){
   if (s) s.value = SUMMARY;
   if (l) l.value = SHARE_URL;
   const btn = el('copyLink');
-  if (!btn) return;
-  let timer;
-  btn.onclick = ()=>{
-    const say = m => { el('copyStatus').textContent = m;
-      clearTimeout(timer); timer = setTimeout(()=>{ const c=el('copyStatus'); if(c) c.textContent=''; }, 3000); };
-    if (navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(SHARE_URL).then(()=>say('copied'),
-        ()=>{ l.select(); say('selected — copy it with your keyboard'); });
-    } else { l.select(); say('selected — copy it with your keyboard'); }
-  };
+  if (btn){
+    let timer;
+    btn.onclick = ()=>{
+      const say = m => { el('copyStatus').textContent = m;
+        clearTimeout(timer); timer = setTimeout(()=>{ const c=el('copyStatus'); if(c) c.textContent=''; }, 3000); };
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(SHARE_URL).then(()=>say('copied'),
+          ()=>{ l.select(); say('selected — copy it with your keyboard'); });
+      } else { l.select(); say('selected — copy it with your keyboard'); }
+    };
+  }
+  const pdfBtn = el('downloadPdf');
+  if (pdfBtn) pdfBtn.onclick = downloadPdf;
+}
+
+/* ── "download the pdf": rebuild every DECK page into one plain, printable
+   document and hand it to the browser's own print-to-PDF, rather than
+   pulling in a PDF library. Two pages get special-cased rather than reused
+   verbatim: "yours to keep" (its textareas/buttons don't mean anything on
+   paper — swap in the plain-text summary instead) and the reflection box
+   (freeze it at whatever state it's settled into by click time). Every
+   other page's ids get stripped so they don't collide with the live,
+   on-screen copies of the same markup. ── */
+function buildPrintPageHtml(pg){
+  if (pg.eyebrow === 'yours to keep'){
+    return `<p style="white-space:pre-wrap">${escapeHtml(SUMMARY)}</p>`;
+  }
+  let html = pg.html.replace(/<div class="reflection"[^>]*>[\s\S]*?<\/div>/,
+    reflectionState === 'done' ? `<div class="reflection"><p>${escapeHtml(reflectionText)}</p></div>` : '');
+  return html.replace(/\sid="[^"]*"/g, '');
+}
+
+function buildPrintHtml(){
+  const title = RESULT ? `Proximity — ${P[RESULT.key].name}'s results` : 'Proximity — results';
+  const stamp = new Date().toLocaleDateString(undefined, {year:'numeric', month:'long', day:'numeric'});
+  const sections = DECK.map(pg => `
+    <section class="pv-page">
+      <div class="pv-eyebrow">${escapeHtml(pg.eyebrow)}</div>
+      ${buildPrintPageHtml(pg)}
+    </section>`).join('');
+  return `<header class="pv-head"><h1>${escapeHtml(title)}</h1><p>${stamp}</p></header>${sections}`;
+}
+
+function downloadPdf(){
+  const view = el('printView');
+  if (!view || !DECK.length) return;
+  view.innerHTML = buildPrintHtml();
+  window.print();
 }
 
 function renderPage(dir){
@@ -1742,6 +1894,7 @@ el('again').onclick = ()=>{
   i = 0; page = 0; DECK = [];
   answers.forEach((_,idx)=>{ answers[idx] = []; });
   OTHER.forEach((_,idx)=>{ OTHER[idx] = ''; });
+  reflectionState = 'idle'; reflectionText = ''; reflectionPromise = null;
   paintField(0,0,false);
   history.replaceState(null, '', location.pathname + location.search);
   show('cover'); window.scrollTo({top:0, behavior:'smooth'});
@@ -1939,11 +2092,54 @@ if (new URLSearchParams(location.search).get('test') === '1'){
             const extrasPage = pages.find(pg => pg.eyebrow === 'in your own words');
             assert('extras page escapes html from free text',
               !!extrasPage && !extrasPage.html.includes('<b>markup</b>'));
+            assert('extras page has a reflection box for showReflection() to hook into',
+              !!extrasPage && extrasPage.html.includes('id="reflectionBox"'));
+            assert('extras page onShow is wired to showReflection', extrasPage.onShow === showReflection);
           }
         }
       });
     });
     RESULT = savedResult;
+
+    // escapeHtml — the one thing standing between Claude's response (or her
+    // own free text) and innerHTML
+    assert('escapeHtml neutralises tags', escapeHtml('<b>hi</b>') === '&lt;b&gt;hi&lt;/b&gt;');
+    assert('escapeHtml neutralises quotes/ampersands', escapeHtml(`"a" & 'b'`) === '&quot;a&quot; &amp; &#39;b&#39;');
+
+    // buildReflectionPayload — the only part of the /api/reflect round trip
+    // that's testable without an actual network call
+    (function(){
+      const extras = [{q:'Q one', a:'note one'}, {q:'Q two', a:'note two'}];
+      const payload = buildReflectionPayload(extras);
+      assert('reflection payload carries the current gate code', payload.code === GUEST.code);
+      assert('reflection payload has one note per extra', Array.isArray(payload.notes) && payload.notes.length === 2);
+      assert('reflection payload notes keep q/a only', payload.notes[0].q === 'Q one' && payload.notes[0].a === 'note one');
+      assert('reflection payload is JSON-serialisable', typeof JSON.stringify(payload) === 'string');
+    })();
+
+    // the PDF builder — same escaping + id-collision guarantees as the live
+    // page, checked without ever calling window.print()
+    (function(){
+      const savedState = reflectionState, savedText = reflectionText;
+      RESULT = { key:'secure', anx:20, avo:20 };
+      const extras = [{q:'A question', a:'<script>evil()<\/script>'}];
+      DECK = resultPages(P.secure, 20, 20, extras).concat(journeyPages());
+
+      reflectionState = 'done'; reflectionText = '<b>claude says hi</b>';
+      let html = buildPrintHtml();
+      assert('print build succeeds with a resolved reflection', typeof html === 'string' && html.length > 0);
+      assert('print view escapes the reflection text', !html.includes('<b>claude says hi</b>') && html.includes('&lt;b&gt;claude says hi&lt;/b&gt;'));
+      assert('print view has no leftover ids to collide with the live page', !/\sid="/.test(html));
+      assert('print view swaps the share page for a plain summary', html.includes(escapeHtml(SUMMARY).slice(0,20)));
+      assert('print view never lets her own free text through as real markup', !html.includes('<script>evil()'));
+
+      reflectionState = 'pending';
+      html = buildPrintHtml();
+      assert('print build succeeds mid-flight, with no reflection text yet', typeof html === 'string' && !html.includes('claude says hi'));
+
+      reflectionState = savedState; reflectionText = savedText;
+      RESULT = savedResult; DECK = [];
+    })();
 
     const failed = results.filter(r => !r.pass);
     console.log(`SELF-TEST: ${results.length - failed.length}/${results.length} passed`);

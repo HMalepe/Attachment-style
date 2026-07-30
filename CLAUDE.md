@@ -8,18 +8,30 @@ them are likely to do to each other.
 
 ## Hard constraints — do not violate
 
-- **Single file.** Everything ships in one `index.html`. No build step, no
-  bundler, no npm dependencies, no framework. If a change needs a build
-  step, propose it and stop — don't implement it.
-- **No network calls at runtime.** No analytics, no telemetry, no fonts
-  beyond the existing Google Fonts `@import`, no CDN scripts. The privacy
-  claim in the copy is load-bearing and must stay literally true. This is
-  why there is no AI/LLM integration anywhere in this file — an Anthropic
-  (or any) API call was explicitly considered and rejected because it
-  either leaks an API key client-side or requires a backend, both of
-  which break this constraint. The per-question photos are real images
-  but ship as base64 inside `index.html` for the same reason — bundled,
-  not fetched.
+- **Single file, plus exactly one narrow exception.** Everything user-facing
+  ships in one `index.html`. No build step, no bundler, no npm dependencies,
+  no framework. The one deliberate exception is `api/reflect.js`, a tiny
+  dependency-free Vercel serverless function whose only job is to hold the
+  Anthropic API key server-side — see "The one network call" below for why
+  it exists and exactly what it's allowed to do. Nothing else gets a
+  backend. If some other change needs a build step, propose it and stop —
+  don't implement it.
+- **No network calls at runtime, except one, and it's an opt-in.** No
+  analytics, no telemetry, no fonts beyond the existing Google Fonts
+  `@import`, no CDN scripts. The privacy claim in the copy must stay
+  literally true — which is why it was rewritten to describe the one real
+  exception instead of pretending it doesn't exist:
+  **if she uses the optional "in your own words" box, that text is sent
+  once, at the end, to `/api/reflect` to generate a short Claude reflection,
+  then discarded — nothing is stored on either end.** If she never touches
+  that box, nothing leaves her phone, same as before. This was a deliberate
+  call after real back-and-forth about it (see git history around the
+  reflection feature) — don't quietly expand what that endpoint does
+  (e.g. logging notes, persisting results, adding other AI calls) without
+  the same level of scrutiny; the whole point was informed consent, not
+  "well, the door's already open." The per-question photos are real images
+  but ship as base64 inside `index.html`, not fetched — that one stays a
+  hard no, no exception.
 - **No storage.** No localStorage, sessionStorage, cookies, or IndexedDB.
   State lives in JS variables and dies with the tab — including the gate:
   passing `GUEST.code` isn't remembered, so it's asked for again on every
@@ -220,6 +232,40 @@ render; a one-time gate you see exactly once doesn't need it.
   that's already in the DOM. Needs no explicit `prefers-reduced-motion`
   override — it only sets opacity/transform via the keyframe, never as a
   base style, so disabling the animation naturally leaves it fully visible.
+- **The reflection feature** — the one network call in the whole app.
+  `finish()` calls `requestReflection(extras)` (fire-and-forget, right when
+  the deck starts, not when she reaches the page — by the time she's
+  clicked through a few results pages the response is usually already
+  back). It POSTs `buildReflectionPayload(extras)` — `{code, notes}`, where
+  `code` is `GUEST.code` and `notes` is her question/answer pairs — to
+  `/api/reflect`. `reflectionState` (`idle`/`pending`/`done`/`failed`) and
+  `reflectionText` are the only state; `showReflection()` is the `onShow`
+  for the "in your own words" page and just paints whatever the current
+  state is, so it's safe to call every time that page is (re)shown,
+  including before the fetch has settled. On failure (bad key, offline,
+  rate-limited, anything) it shows a plain "couldn't reach Claude" message
+  with a WhatsApp link to `HOLIDAY_WHATSAPP` — never a broken page, never a
+  silent retry loop. `buildReflectionPayload` is deliberately a pure
+  function separate from the `fetch()` call so the self-test can check its
+  shape without touching the network. See `api/reflect.js` for the server
+  side: it re-checks `code` against `GATE_CODE` (update both together when
+  you change `GUEST.code`), caps note count/length, and never persists
+  anything — that function is stateless by design, don't add a database
+  behind it.
+- **The PDF export** — `downloadPdf()` (wired to the "download the pdf"
+  button on the "yours to keep" page, inside `fillShare()`) builds one
+  plain HTML document out of the current `DECK` via `buildPrintHtml()` /
+  `buildPrintPageHtml()`, drops it into the hidden `#printView`, and calls
+  `window.print()` — the browser's own print-to-PDF, no library, no
+  network, no server. Two things get special-cased rather than reused
+  as-is: the "yours to keep" page (its live textareas/buttons mean nothing
+  on paper, so it's swapped for the plain-text `SUMMARY`) and the
+  reflection box (frozen at whatever `reflectionState` has settled to by
+  click time — never ships the "still thinking" placeholder). Every other
+  page's `id="..."` attributes get stripped before insertion so they can't
+  collide with the live, on-screen copies of the same ids. If you add a
+  page type to the deck, no special handling is needed unless it has its
+  own interactive-only markup like the share page does.
 - `encodeAnswers()` / `decodeAnswers()` — pack/unpack the answer array into
   a version-tagged (`HASH_VERSION`), URL-safe base64 string for the
   shareable-link feature. Each question packs as a 4-bit option bitmask
@@ -256,6 +302,11 @@ quietly ruins her own result. Never drop that nudge.
 
 ## Before you finish any task
 
-1. Confirm no new network calls, no storage, no dependencies.
+1. Confirm no *new* network calls or storage beyond the one documented
+   exception (`/api/reflect`, stateless, opt-in), and no new npm
+   dependencies anywhere, including in `api/reflect.js`.
 2. Confirm keyboard nav and focus rings still work.
-3. Report what you changed and what you deliberately didn't.
+3. If you touched anything that sends data anywhere, confirm the on-screen
+   privacy copy (cover screen, closing "the ask" page) still describes
+   reality exactly — not "close enough."
+4. Report what you changed and what you deliberately didn't.
