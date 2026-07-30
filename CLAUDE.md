@@ -37,6 +37,13 @@ between the two.
 - `FOUNDER{}` — the founder's fixed coordinate and personal note.
 - `tally()` — normalises raw loads to 0–100 per axis.
 - `paintField()` — drives the signature two-orb visual.
+- `encodeAnswers()` / `decodeAnswers()` — pack/unpack the 18-answer array into
+  a version-tagged (`HASH_VERSION`), URL-safe base64 string for the
+  shareable-link feature. A version mismatch or malformed string never
+  renders a result — it always falls back to a fresh intake with a visible
+  message. The decode check runs at the very end of the script, after
+  `RESULT` is declared — calling it earlier hits the `let RESULT` temporal
+  dead zone.
 
 ## Voice
 

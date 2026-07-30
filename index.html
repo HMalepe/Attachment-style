@@ -173,6 +173,14 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
   background:var(--ink);color:var(--text);border:1px solid var(--line);border-radius:10px;
   padding:14px;font-family:var(--mono);font-size:12px;line-height:1.75
 }
+.share textarea.share-link{min-height:auto;resize:none;white-space:nowrap;overflow-x:auto}
+.share .copybtn{
+  margin-top:12px;border:1px solid var(--line);border-radius:100px;padding:10px 20px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text);transition:border-color .2s,color .2s
+}
+.share .copybtn:hover{border-color:var(--gold);color:var(--gold)}
+.share .copystatus{margin-left:12px}
 .small{font-size:13px;line-height:1.6;color:var(--muted)}
 .foot{border-top:1px solid var(--line);margin-top:30px;padding-top:18px}
 
@@ -292,7 +300,7 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
     </div>
 
     <p class="note rise d4">Eighteen questions. No right answers and no score against anyone else — it plots you as a single point on those two axes. Nearly everything else about how a person loves follows from where that point lands.</p>
-    <p class="note rise d5"><b>Nothing is saved or sent.</b> It runs entirely in this tab. Close it and it's gone. What you see at the end is yours to share or keep.</p>
+    <p class="note rise d5"><b>Nothing is saved or sent.</b> It runs entirely in this tab and there's no server behind it. Close it and it's gone — unless you choose to copy the shareable link at the end, which carries your answers in its address and nowhere else.</p>
 
     <button class="cta rise d5" id="start">Start the intake <span class="arw">→</span></button>
     <p class="note rise d5" style="margin-top:16px;font-size:13px">Answer on instinct, not on who you'd like to be. The instrument is only as good as the honesty.</p>
@@ -369,6 +377,14 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
       <div class="mono">Summary · yours to copy</div>
       <p class="small" style="margin-top:8px">Nothing gets sent automatically. Copy this if you want to send it back.</p>
       <textarea id="summary" readonly onclick="this.select()"></textarea>
+    </div>
+
+    <div class="share">
+      <div class="mono">Shareable link · yours to send</div>
+      <p class="small" style="margin-top:8px">Still nothing sent to a server — this link carries your 18 answers in its address, nothing more. Anyone who opens it lands straight on this result page. Only share it with people you want seeing it.</p>
+      <textarea id="shareLink" class="share-link" readonly onclick="this.select()"></textarea>
+      <button class="copybtn" id="copyLink">Copy shareable link</button>
+      <span class="mono copystatus" id="copyStatus"></span>
     </div>
 
     <div class="invite">
@@ -623,6 +639,45 @@ function tally(){
   };
 }
 
+/* ── shareable link: pack 18 answers (2 bits each, 4 options) behind a
+   version byte so a future edit to the question bank can't silently
+   misread an old link ── */
+const HASH_VERSION = 1;
+
+function encodeAnswers(ans){
+  let bits = ans.map(a => a.toString(2).padStart(2,'0')).join('');
+  while (bits.length % 8 !== 0) bits += '0';   // pad to whole bytes
+  const bytes = [HASH_VERSION];
+  for (let i = 0; i < bits.length; i += 8) bytes.push(parseInt(bits.slice(i,i+8), 2));
+  const bin = String.fromCharCode(...bytes);
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+function decodeAnswers(str){
+  let b64;
+  try { b64 = str.replace(/-/g,'+').replace(/_/g,'/'); }
+  catch(e){ return { ok:false, reason:'malformed' }; }
+  while (b64.length % 4) b64 += '=';
+  let bin;
+  try { bin = atob(b64); }
+  catch(e){ return { ok:false, reason:'malformed' }; }
+  const bytes = Array.from(bin, c => c.charCodeAt(0));
+  const expectedBytes = 1 + Math.ceil(Q.length*2/8);   // version byte + packed payload
+  if (bytes.length !== expectedBytes) return { ok:false, reason:'malformed' };
+  if (bytes[0] !== HASH_VERSION) return { ok:false, reason:'version' };
+  let bits = '';
+  for (let i = 1; i < bytes.length; i++) bits += bytes[i].toString(2).padStart(8,'0');
+  const out = [];
+  for (let qi = 0; qi < Q.length; qi++){
+    const chunk = bits.slice(qi*2, qi*2+2);
+    if (chunk.length < 2) return { ok:false, reason:'truncated' };
+    const v = parseInt(chunk, 2);
+    if (!Number.isInteger(v) || v < 0 || v >= Q[qi].o.length) return { ok:false, reason:'range' };
+    out.push(v);
+  }
+  return { ok:true, answers: out };
+}
+
 /* ── the field: avoidance sets distance, anxiety sets tension ── */
 function paintField(anx, avo, settled){
   const gap  = 34 + (avo/100)*118;          // 34 → 152 px apart
@@ -717,6 +772,9 @@ What I need: ${p.needs.join(' / ')}
 
 Growth edge: ${p.edge[0]}`;
 
+  el('shareLink').value = location.origin + location.pathname + '#r=' + encodeAnswers(answers);
+  el('copyStatus').textContent = '';
+
   show('results');
   window.scrollTo({top:0, behavior:'smooth'});
 
@@ -740,7 +798,27 @@ el('again').onclick = ()=>{
   i = 0; answers.fill(null);
   el('anxBar').style.width = '0'; el('avoBar').style.width = '0';
   paintField(0,0,false);
+  history.replaceState(null, '', location.pathname + location.search);
   show('cover'); window.scrollTo({top:0, behavior:'smooth'});
+};
+
+let copyStatusTimer;
+el('copyLink').onclick = ()=>{
+  const val = el('shareLink').value;
+  const showStatus = msg => {
+    el('copyStatus').textContent = msg;
+    clearTimeout(copyStatusTimer);
+    copyStatusTimer = setTimeout(()=>{ el('copyStatus').textContent = ''; }, 3000);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(val).then(
+      ()=> showStatus('Copied'),
+      ()=>{ el('shareLink').select(); showStatus('Selected — copy with your device’s copy command'); }
+    );
+  } else {
+    el('shareLink').select();
+    showStatus('Selected — copy with your device’s copy command');
+  }
 };
 
 document.addEventListener('keydown', e=>{
@@ -973,7 +1051,7 @@ const CH = [
       <p><b>One.</b> Don't use this as a label — on him or on yourself. \u201cThat's just my attachment style\u201d is the fastest way to turn a useful description into an excuse. It describes a starting point, not a ceiling.</p>
       <p><b>Two.</b> When the loop shows up — and it will — name it out loud rather than solving the argument you're having. For the two of you specifically, the first move is: <em>${pr.fix[0].replace(/<\/?b>/g,'')}</em></p>
       <div class="pull">He told you what he is before you asked. Least he can do is find out what you'd need.</div>
-      <p style="color:var(--muted);font-size:15px">One last thing, in case it needs saying: none of this was stored, sent, or logged. It ran in your browser and it's gone when you close the tab. The only version that exists anywhere is the one you choose to send him.</p>
+      <p style="color:var(--muted);font-size:15px">One last thing, in case it needs saying: none of this was stored, sent, or logged to a server. It ran in your browser and it's gone when you close the tab. If you copied a shareable link, that link — and only that link — carries your answers; the only version that exists anywhere is the one you choose to send him.</p>
       <div class="chnav" style="border:none;margin-top:8px;padding-top:0">
         <button class="ghost" id="reReview">← Back to my result</button>
       </div>`;
@@ -1044,6 +1122,23 @@ document.addEventListener('keydown', e=>{
   if (e.key === 'ArrowRight' && c < CH.length-1){ c++; chRender(); }
   if (e.key === 'ArrowLeft'  && c > 0){ c--; chRender(); }
 });
+
+/* ── a shared link renders straight to results — decode failure never
+   renders a result, it always falls back to a fresh intake ── */
+(function(){
+  if (!location.hash.startsWith('#r=')) return;
+  const dec = decodeAnswers(location.hash.slice(3));
+  if (dec.ok){
+    dec.answers.forEach((v, idx)=>{ answers[idx] = v; });
+    finish();
+  } else {
+    history.replaceState(null, '', location.pathname + location.search);
+    const msg = document.createElement('p');
+    msg.className = 'note rise d5';
+    msg.innerHTML = '<b>That link is from an older or invalid version of this test.</b> Results can’t be replayed from it safely, so nothing was guessed — retake the 18 questions below and you’ll get a fresh link to share instead.';
+    el('start').insertAdjacentElement('beforebegin', msg);
+  }
+})();
 </script>
 </body>
 </html>
