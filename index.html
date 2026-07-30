@@ -6,58 +6,71 @@
 <title>Proximity — a field test for how you do closeness</title>
 <meta name="description" content="Eighteen questions that map how you handle closeness. Two axes, one coordinate, no horoscopes." />
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;1,9..40,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap');
 
 :root{
-  /* ---------- base surfaces ---------- */
-  --ink:#0A0711;
-  --ink-2:#120C1F;
-  --surface:#171125;
-  --surface-hi:#1F1734;
-  --line:#332A4D;
-  --line-hi:#4A3E6B;
-  --text:#F3EFFA;
-  --text-2:#DCD5EB;
-  --muted:#9E95B6;
-  --muted-2:#6B6288;
-  --btn-top:#FFFFFF;
-  --btn-bot:#E8E2F4;
+  /* ---------- ground: cream + nude ---------- */
+  --ink:#FDF7F3;          /* page ground (light) */
+  --ink-2:#F8ECE4;
+  --surface:#FFFBF8;
+  --surface-hi:#FDF2EB;
+  --line:#EBD7CB;
+  --line-hi:#DCC0B1;
+  --text:#432E33;         /* warm near-black, never pure black */
+  --text-2:#5E454A;
+  --muted:#7D5F65;
+  --muted-2:#85696E;
 
-  /* ---------- accents ---------- */
-  --warm:#FF6B9D;   /* anxiety axis */
-  --cool:#5CE1E6;   /* avoidance axis */
-  --gold:#F2C57C;   /* secure */
-  --violet:#A78BFA; /* fearful */
+  /* ---------- accents: rose, sage, honey, plum ---------- */
+  --warm:#D0687F;         /* anxiety axis — dusty rose */
+  --cool:#8FAE9B;         /* avoidance axis — sage */
+  --gold:#DFA45F;         /* secure — honey */
+  --violet:#AC7CA4;       /* fearful — plum */
+  --rose-deep:#A33A55;
+  /* petal tints for the rose symbol */
+  --petal-rose-2:#E894A6;  --petal-rose-3:#FCE9EC;
+  --petal-sage-2:#B0C9BA;  --petal-sage-3:#F0F7F2;
+  --petal-soft-1:#EFC3CB;  --petal-soft-2:#F6D9DE;  --petal-soft-3:#FBEAEE;
+  --petal-leaf-1:#CFDCD2;  --petal-leaf-2:#E2ECE5;  --petal-leaf-3:#F2F7F4;
+  /* text-safe versions of the four accents — the pastels above are for
+     fills, dots and bars only; they fail contrast as small text on cream */
+  --warm-ink:#A33A55;
+  --cool-ink:#4F6B58;
+  --gold-ink:#8A5A1E;
+  --violet-ink:#7A4B72;
+  --blush:#F6DCD8;
+  --btn-top:#B54660;
+  --btn-bot:#96334A;
 
-  /* ---------- glass material ---------- */
-  --glass:rgba(255,255,255,.045);
-  --glass-hi:rgba(255,255,255,.075);
-  --glass-brd:rgba(255,255,255,.10);
-  --glass-brd-hi:rgba(255,255,255,.18);
-  --blur:saturate(160%) blur(20px);
-  --blur-lg:saturate(170%) blur(30px);
-  --sheen:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,0) 45%);
+  /* ---------- soft glass on cream ---------- */
+  --glass:rgba(255,255,255,.62);
+  --glass-hi:rgba(255,255,255,.85);
+  --glass-brd:rgba(174,124,112,.22);
+  --glass-brd-hi:rgba(174,124,112,.42);
+  --blur:saturate(115%) blur(14px);
+  --blur-lg:saturate(120%) blur(22px);
+  --sheen:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,0) 55%);
 
-  /* ---------- elevation (dark-UI safe) ---------- */
-  --elev-1:0 1px 2px rgba(0,0,0,.45), 0 6px 16px -8px rgba(0,0,0,.65);
-  --elev-2:0 2px 6px rgba(0,0,0,.5), 0 20px 44px -20px rgba(0,0,0,.8);
-  --elev-3:0 4px 14px rgba(0,0,0,.55), 0 36px 76px -28px rgba(0,0,0,.9);
-  --glow-warm:0 16px 44px -16px rgba(255,107,157,.55);
-  --glow-gold:0 16px 44px -16px rgba(242,197,124,.42);
-  --ring:0 0 0 1px rgba(255,255,255,.06) inset;
+  /* ---------- warm elevation (never black) ---------- */
+  --elev-1:0 1px 2px rgba(140,86,74,.06), 0 8px 20px -12px rgba(140,86,74,.20);
+  --elev-2:0 2px 8px rgba(140,86,74,.08), 0 22px 46px -22px rgba(140,86,74,.26);
+  --elev-3:0 4px 16px rgba(140,86,74,.10), 0 40px 80px -32px rgba(140,86,74,.34);
+  --glow-warm:0 18px 44px -16px rgba(208,104,127,.45);
+  --glow-gold:0 18px 44px -16px rgba(223,164,95,.40);
+  --ring:0 0 0 1px rgba(255,255,255,.55) inset;
 
   /* ---------- motion ---------- */
   --ease:cubic-bezier(.22,1,.36,1);
   --spring:cubic-bezier(.34,1.36,.42,1);
 
-  /* ---------- type ---------- */
+  /* ---------- type: serif-forward ---------- */
   --display:'Bricolage Grotesque',system-ui,sans-serif;
   --body:'DM Sans',system-ui,sans-serif;
   --serif:'Instrument Serif',ui-serif,Georgia,serif;
-  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --label:'DM Sans',system-ui,sans-serif;   /* chrome labels — letterspaced caps */
 
-  /* ---------- grain (inline, no network) ---------- */
-  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+  /* ---------- paper grain ---------- */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -68,19 +81,19 @@ body{
   text-rendering:optimizeLegibility;
   background-color:var(--ink);
   background-image:
-    radial-gradient(120vw 92vh at 6% -14%, rgba(255,107,157,.22), transparent 62%),
-    radial-gradient(112vw 88vh at 98% -6%, rgba(92,225,230,.17), transparent 60%),
-    radial-gradient(100vw 82vh at 82% 40%, rgba(167,139,250,.17), transparent 58%),
-    radial-gradient(92vw 72vh at 2% 72%, rgba(242,197,124,.10), transparent 56%),
-    radial-gradient(124vw 94vh at 48% 112%, rgba(167,139,250,.16), transparent 62%);
+    radial-gradient(120vw 90vh at 6% -12%, rgba(240,190,196,.55), transparent 60%),
+    radial-gradient(110vw 85vh at 98% -6%, rgba(247,215,192,.50), transparent 58%),
+    radial-gradient(100vw 80vh at 84% 42%, rgba(226,196,214,.42), transparent 56%),
+    radial-gradient(92vw 72vh at 0% 70%, rgba(203,220,206,.38), transparent 55%),
+    radial-gradient(124vw 92vh at 46% 112%, rgba(244,207,199,.50), transparent 60%);
   background-attachment:fixed;
 }
 /* aurora drift — the mesh breathes */
 body::after{
   content:'';position:fixed;inset:-25%;z-index:0;pointer-events:none;
   background:
-    radial-gradient(38vw 38vw at 22% 28%, rgba(167,139,250,.12), transparent 60%),
-    radial-gradient(34vw 34vw at 78% 66%, rgba(92,225,230,.09), transparent 60%);
+    radial-gradient(38vw 38vw at 22% 28%, rgba(226,168,186,.30), transparent 62%),
+    radial-gradient(34vw 34vw at 78% 66%, rgba(198,219,203,.26), transparent 62%);
   filter:blur(40px);
   animation:aurora 28s var(--ease) infinite alternate;
 }
@@ -92,20 +105,37 @@ body::after{
 body::before{
   content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
   background-image:var(--grain);
-  opacity:.16;
+  opacity:.05;
 }
 button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
 :focus-visible{
-  outline:2px solid var(--gold);outline-offset:3px;border-radius:10px;
-  box-shadow:0 0 0 6px rgba(242,197,124,.14);
+  outline:2px solid var(--warm);outline-offset:3px;border-radius:12px;
+  box-shadow:0 0 0 6px rgba(208,104,127,.18);
 }
 
 .wrap{position:relative;z-index:2;max-width:720px;margin:0 auto;padding:28px 20px 80px}
-.mono{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.eyebrow{font-family:var(--label);font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
 
-/* ---------- the field: signature element ---------- */
+/* ---------- the field: two roses, one thread ---------- */
 .field{position:relative;height:132px;margin:6px 0 22px}
 .field svg{width:100%;height:100%;overflow:visible;display:block}
+.tg-a{stop-color:var(--warm)}
+.tg-b{stop-color:var(--cool)}
+.bloom-a{--petal-1:var(--warm);--petal-2:var(--petal-rose-2);--petal-3:var(--petal-rose-3)}
+.bloom-b{--petal-1:var(--cool);--petal-2:var(--petal-sage-2);--petal-3:var(--petal-sage-3)}
+.bloom-halo{fill:none;stroke-width:.8;opacity:.32}
+.halo-a{stroke:var(--warm)}
+.halo-b{stroke:var(--cool)}
+
+/* decorative botanicals — soft, behind everything, never interactive */
+.petal-field{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.petal-field svg{
+  position:absolute;opacity:.30;filter:blur(1.5px);
+  --petal-1:var(--petal-soft-1);--petal-2:var(--petal-soft-2);--petal-3:var(--petal-soft-3);
+}
+.petal-field .p1{top:-58px;left:-56px;width:186px;transform:rotate(-18deg)}
+.petal-field .p2{top:34%;right:-64px;width:150px;transform:rotate(24deg);--petal-1:var(--petal-leaf-1);--petal-2:var(--petal-leaf-2);--petal-3:var(--petal-leaf-3)}
+.petal-field .p3{bottom:-52px;left:-40px;width:168px;transform:rotate(8deg)}
 .orb-g{transition:transform 1.1s var(--ease)}
 .drift-a{animation:driftA 9s ease-in-out infinite}
 .drift-b{animation:driftB 11s ease-in-out infinite}
@@ -119,13 +149,13 @@ button{font-family:inherit;color:inherit;background:none;border:none;cursor:poin
 /* ---------- header ---------- */
 header{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:10px}
 .bar{
-  height:3px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin-top:10px;
+  height:3px;background:rgba(174,124,112,.16);border-radius:99px;overflow:hidden;margin-top:10px;
   box-shadow:var(--ring);
 }
 .bar span{
   display:block;height:100%;width:0;border-radius:99px;
   background:linear-gradient(90deg,var(--warm),var(--violet),var(--cool));
-  box-shadow:0 0 14px -2px rgba(167,139,250,.7);
+  box-shadow:0 0 14px -3px rgba(208,104,127,.55);
   transition:width .5s var(--ease);
 }
 
@@ -142,12 +172,12 @@ h1{
   font-size:clamp(54px,15.5vw,108px);line-height:.92;letter-spacing:-.05em;
   margin:14px 0 10px;padding-bottom:.12em;
   font-variation-settings:'opsz' 96;
-  background:linear-gradient(178deg,var(--text) 40%,rgba(243,239,250,.62));
+  background:linear-gradient(170deg,var(--text) 35%,rgba(67,46,51,.68));
   -webkit-background-clip:text;background-clip:text;color:transparent;
 }
 h1 em{
   font-style:normal;
-  background:linear-gradient(160deg,var(--warm),var(--violet));
+  background:linear-gradient(150deg,var(--warm),var(--violet));
   -webkit-background-clip:text;background-clip:text;color:transparent;
 }
 .lede{
@@ -163,9 +193,9 @@ h1 em{
   display:inline-flex;align-items:center;gap:12px;margin-top:30px;
   background:linear-gradient(180deg,var(--btn-top),var(--btn-bot));
   color:var(--ink);
-  font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  font-family:var(--label);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
   padding:17px 28px;border-radius:100px;
-  box-shadow:var(--elev-2), inset 0 1px 0 rgba(255,255,255,.9);
+  box-shadow:var(--elev-2), var(--glow-warm), inset 0 1px 0 rgba(255,255,255,.35);
   transition:transform .3s var(--spring), box-shadow .3s var(--ease);
 }
 .cta::after{
@@ -173,12 +203,12 @@ h1 em{
   background:linear-gradient(105deg,transparent 32%,rgba(255,255,255,.75) 48%,transparent 62%);
   transform:translateX(-120%);
 }
-.cta:hover{transform:translateY(-3px);box-shadow:var(--elev-3), var(--glow-warm), inset 0 1px 0 rgba(255,255,255,.9)}
+.cta:hover{transform:translateY(-3px);box-shadow:var(--elev-3), var(--glow-warm), inset 0 1px 0 rgba(255,255,255,.35)}
 .cta:hover::after{transform:translateX(120%);transition:transform .9s var(--ease)}
 .cta .arw{transition:transform .3s var(--ease)}
 .cta:hover .arw{transform:translateX(5px)}
 .ghost{
-  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  font-family:var(--label);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
   color:var(--muted);padding:12px 0;transition:color .2s
 }
 .ghost:hover{color:var(--text)}
@@ -186,7 +216,7 @@ h1 em{
 .axes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:34px}
 .axis{
   position:relative;overflow:hidden;
-  border:1px solid var(--glass-brd);border-radius:18px;padding:18px;
+  border:1px solid var(--glass-brd);border-radius:22px;padding:19px;
   background:var(--glass);
   -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
   box-shadow:var(--elev-1), var(--ring);
@@ -195,12 +225,12 @@ h1 em{
 .axis::before{content:'';position:absolute;inset:0 0 auto;height:52%;background:var(--sheen);pointer-events:none}
 .axis > *{position:relative}
 .axis:hover{border-color:var(--glass-brd-hi);transform:translateY(-2px)}
-.axis .k{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase}
+.axis .k{font-family:var(--label);font-size:10px;letter-spacing:.18em;text-transform:uppercase}
 .axis p{font-size:14px;line-height:1.55;color:var(--muted);margin-top:9px}
-.axis.w .k{color:var(--warm)}.axis.c .k{color:var(--cool)}
+.axis.w .k{color:var(--warm-ink)}.axis.c .k{color:var(--cool-ink)}
 
 /* ---------- questions ---------- */
-.qnum{font-family:var(--mono);font-size:12px;letter-spacing:.22em;color:var(--muted);margin-bottom:14px}
+.qnum{font-family:var(--label);font-size:12px;letter-spacing:.22em;color:var(--muted);margin-bottom:14px}
 .qtext{
   font-family:var(--display);font-weight:600;
   font-size:clamp(26px,6.8vw,39px);line-height:1.12;letter-spacing:-.018em;
@@ -213,8 +243,8 @@ h1 em{
   display:flex;align-items:flex-start;gap:14px;text-align:left;
   background:var(--glass);
   -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
-  border:1px solid var(--glass-brd);border-radius:16px;
-  padding:17px 19px;font-size:16px;line-height:1.45;
+  border:1px solid var(--glass-brd);border-radius:20px;
+  padding:18px 20px;font-size:16px;line-height:1.45;
   box-shadow:var(--elev-1), var(--ring);
   transition:background .22s var(--ease), border-color .22s var(--ease),
              transform .28s var(--spring), box-shadow .28s var(--ease);
@@ -228,22 +258,22 @@ h1 em{
 .opt .key{
   position:relative;
   flex:0 0 24px;height:24px;border-radius:8px;
-  background:rgba(255,255,255,.07);border:1px solid var(--glass-brd);
-  font-family:var(--mono);font-size:11px;font-weight:600;color:var(--muted);
+  background:var(--blush);border:1px solid var(--glass-brd);
+  font-family:var(--label);font-size:11px;font-weight:600;color:var(--warm-ink);
   display:grid;place-items:center;margin-top:1px;
   transition:background .22s var(--ease),color .22s var(--ease),border-color .22s var(--ease)
 }
-.opt:hover .key{background:var(--warm);border-color:transparent;color:var(--ink)}
+.opt:hover .key{background:var(--warm-ink);border-color:transparent;color:var(--ink)}
 .opt.picked{
-  border-color:rgba(242,197,124,.55);background:var(--glass-hi);
+  border-color:rgba(223,164,95,.75);background:var(--glass-hi);
   box-shadow:var(--elev-2), var(--glow-gold), var(--ring);
 }
-.opt.picked .key{background:var(--gold);border-color:transparent;color:var(--ink)}
+.opt.picked .key{background:var(--gold-ink);border-color:transparent;color:var(--ink)}
 .qfoot{display:flex;justify-content:space-between;align-items:center;margin-top:22px}
-.hint{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2)}
+.hint{font-family:var(--label);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2)}
 
 /* ---------- results ---------- */
-.verdict-k{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.verdict-k{font-family:var(--label);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
 .verdict{
   font-family:var(--display);font-weight:800;
   font-size:clamp(40px,10.5vw,68px);line-height:.94;letter-spacing:-.032em;margin:10px 0 16px;
@@ -253,7 +283,7 @@ h1 em{
 
 .grid-card{
   position:relative;overflow:hidden;
-  margin:30px 0;border:1px solid var(--glass-brd);border-radius:24px;padding:22px;
+  margin:30px 0;border:1px solid var(--glass-brd);border-radius:28px;padding:24px;
   background:var(--glass);
   -webkit-backdrop-filter:var(--blur-lg);backdrop-filter:var(--blur-lg);
   box-shadow:var(--elev-2), var(--ring);
@@ -261,21 +291,21 @@ h1 em{
 .grid-card::before{content:'';position:absolute;inset:0 0 auto;height:40%;background:var(--sheen);pointer-events:none}
 .map-row{position:relative;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
 .map{flex:0 0 auto;width:236px;height:236px;margin:0 auto}
-.map text{font-family:var(--mono);font-size:7.4px;letter-spacing:.1em;fill:var(--muted)}
+.map text{font-family:var(--label);font-size:7.4px;letter-spacing:.1em;fill:var(--muted)}
 #you{transition:cx 1.2s var(--ease), cy 1.2s var(--ease)}
 #youRing{animation:ping 2.6s ease-out infinite;transform-origin:center}
 @keyframes ping{0%{r:6;opacity:.9}70%,100%{r:20;opacity:0}}
 .readouts{flex:1 1 190px;min-width:180px}
 .meter{margin-bottom:16px}
-.meter .top{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+.meter .top{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--label);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
 .meter .val{font-size:16px;font-weight:600;color:var(--text)}
-.track{height:6px;background:rgba(255,255,255,.06);border-radius:99px;margin-top:8px;overflow:hidden;box-shadow:var(--ring)}
+.track{height:6px;background:rgba(174,124,112,.16);border-radius:99px;margin-top:8px;overflow:hidden;box-shadow:var(--ring)}
 .track span{display:block;height:100%;width:0;border-radius:99px;transition:width 1.2s var(--ease)}
 .meter .desc{font-size:13px;line-height:1.55;color:var(--muted);margin-top:9px}
 
 section.blk{border-top:1px solid var(--glass-brd);padding:24px 0}
 section.blk h3{
-  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;
+  font-family:var(--label);font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;
   color:var(--muted);margin-bottom:13px
 }
 section.blk p{font-size:16px;line-height:1.68;margin-bottom:12px}
@@ -294,7 +324,7 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
 
 .share{
   position:relative;overflow:hidden;
-  border:1px solid var(--glass-brd);border-radius:20px;padding:20px;margin-top:24px;
+  border:1px solid var(--glass-brd);border-radius:24px;padding:22px;margin-top:24px;
   background:var(--glass);
   -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
   box-shadow:var(--elev-1), var(--ring);
@@ -303,18 +333,18 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
 .share > *{position:relative}
 .share textarea{
   width:100%;min-height:132px;margin-top:12px;resize:vertical;
-  background:rgba(0,0,0,.28);color:var(--text-2);
+  background:rgba(255,255,255,.72);color:var(--text-2);
   border:1px solid var(--glass-brd);border-radius:12px;
-  padding:14px;font-family:var(--mono);font-size:12px;line-height:1.75
+  padding:14px;font-family:var(--label);font-size:12px;line-height:1.75
 }
 .share textarea.share-link{min-height:auto;resize:none;white-space:nowrap;overflow-x:auto}
 .share .copybtn{
   margin-top:12px;border:1px solid var(--glass-brd);border-radius:100px;padding:11px 22px;
   background:var(--glass-hi);
-  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  font-family:var(--label);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
   color:var(--text);transition:border-color .25s var(--ease),color .25s var(--ease),transform .25s var(--spring)
 }
-.share .copybtn:hover{border-color:rgba(242,197,124,.6);color:var(--gold);transform:translateY(-2px)}
+.share .copybtn:hover{border-color:var(--glass-brd-hi);color:var(--warm-ink);transform:translateY(-2px)}
 .share .copystatus{margin-left:12px}
 .small{font-size:13px;line-height:1.65;color:var(--muted)}
 .foot{border-top:1px solid var(--glass-brd);margin-top:30px;padding-top:20px}
@@ -322,7 +352,7 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
 /* ---------- act two: the journey ---------- */
 .invite{
   position:relative;overflow:hidden;
-  margin-top:26px;border:1px solid var(--glass-brd-hi);border-radius:24px;padding:24px;
+  margin-top:26px;border:1px solid var(--glass-brd-hi);border-radius:28px;padding:26px;
   background:linear-gradient(150deg,rgba(167,139,250,.16),rgba(92,225,230,.07)), var(--glass);
   -webkit-backdrop-filter:var(--blur-lg);backdrop-filter:var(--blur-lg);
   box-shadow:var(--elev-2), var(--ring);
@@ -355,44 +385,44 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
   font-family:var(--serif);font-weight:400;font-size:clamp(22px,5.4vw,27px);
   line-height:1.3;letter-spacing:-.01em;color:var(--text);max-width:32ch
 }
-.cite{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2);margin-top:8px}
+.cite{font-family:var(--label);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2);margin-top:8px}
 
 .quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}
 .quad .cell{
   position:relative;overflow:hidden;
-  border:1px solid var(--glass-brd);border-radius:18px;padding:17px;
+  border:1px solid var(--glass-brd);border-radius:22px;padding:18px;
   background:var(--glass);
   -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
   box-shadow:var(--elev-1), var(--ring);
 }
 .quad .cell::before{content:'';position:absolute;inset:0 0 auto;height:45%;background:var(--sheen);pointer-events:none}
 .quad .cell > *{position:relative}
-.quad .cell .k{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:11px}
+.quad .cell .k{font-family:var(--label);font-size:10px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:11px}
 .quad .cell .step{font-size:14px;line-height:1.55;color:var(--muted);margin-bottom:7px}
 .quad .cell .step b{color:var(--text-2);font-weight:500}
 
 .loop{width:100%;max-width:400px;margin:24px auto;display:block}
-.loop text{font-family:var(--mono);font-size:8px;letter-spacing:.1em;fill:var(--muted)}
+.loop text{font-family:var(--label);font-size:8px;letter-spacing:.1em;fill:var(--muted)}
 .loop .flow{stroke-dasharray:5 7;animation:flow 2.4s linear infinite}
 @keyframes flow{to{stroke-dashoffset:-24}}
 
 .pairbox{
   position:relative;overflow:hidden;
-  border:1px solid var(--glass-brd-hi);border-radius:24px;padding:24px;margin:22px 0;
+  border:1px solid var(--glass-brd-hi);border-radius:28px;padding:26px;margin:22px 0;
   background:var(--glass);
   -webkit-backdrop-filter:var(--blur-lg);backdrop-filter:var(--blur-lg);
   box-shadow:var(--elev-2), var(--ring);
 }
 .pairbox::before{content:'';position:absolute;inset:0 0 auto;height:40%;background:var(--sheen);pointer-events:none}
 .pairbox > *{position:relative}
-.pairbox .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.pairbox .lbl{font-family:var(--label);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
 .pairbox h4{font-family:var(--display);font-weight:700;font-size:clamp(25px,6.2vw,33px);line-height:1.1;letter-spacing:-.022em;margin:10px 0 15px}
 .dyad{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
 .chip{
   display:flex;align-items:center;gap:8px;
-  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
-  border:1px solid var(--glass-brd);border-radius:100px;padding:8px 14px;
-  background:rgba(255,255,255,.05);
+  font-family:var(--label);font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;
+  border:1px solid var(--glass-brd);border-radius:100px;padding:9px 15px;
+  background:rgba(255,255,255,.7);
   box-shadow:var(--ring);
 }
 .chip i{width:8px;height:8px;border-radius:50%;display:block}
@@ -402,12 +432,12 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
   position:relative;overflow:hidden;
   display:inline-flex;align-items:center;gap:10px;
   background:linear-gradient(180deg,var(--btn-top),var(--btn-bot));color:var(--ink);
-  font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  font-family:var(--label);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
   padding:15px 24px;border-radius:100px;
-  box-shadow:var(--elev-2), inset 0 1px 0 rgba(255,255,255,.9);
+  box-shadow:var(--elev-2), var(--glow-warm), inset 0 1px 0 rgba(255,255,255,.35);
   transition:transform .3s var(--spring), box-shadow .3s var(--ease)
 }
-.nx:hover{transform:translateY(-3px);box-shadow:var(--elev-3), var(--glow-warm), inset 0 1px 0 rgba(255,255,255,.9)}
+.nx:hover{transform:translateY(-3px);box-shadow:var(--elev-3), var(--glow-warm), inset 0 1px 0 rgba(255,255,255,.35)}
 .nx .arw{transition:transform .3s var(--ease)}
 .nx:hover .arw{transform:translateX(5px)}
 .dots{display:flex;gap:7px}
@@ -426,6 +456,14 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
 </style>
 </head>
 <body>
+
+<!-- ══════════ soft botanicals, purely decorative ══════════ -->
+<div class="petal-field" aria-hidden="true">
+  <svg class="p1" viewBox="-32 -32 64 64"><use href="#rose"/></svg>
+  <svg class="p2" viewBox="-32 -32 64 64"><use href="#rose"/></svg>
+  <svg class="p3" viewBox="-32 -32 64 64"><use href="#rose"/></svg>
+</div>
+
 <div class="wrap">
 
   <!-- ══════════ FIELD (persistent) ══════════ -->
@@ -433,35 +471,58 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
     <svg viewBox="0 0 400 132" preserveAspectRatio="xMidYMid meet">
       <defs>
         <filter id="glow" x="-120%" y="-120%" width="340%" height="340%">
-          <feGaussianBlur stdDeviation="7" result="b"/>
+          <feGaussianBlur stdDeviation="6" result="b"/>
           <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
         <linearGradient id="tg" x1="0" x2="1">
-          <stop offset="0%" stop-color="#FF6B9D"/><stop offset="100%" stop-color="#5CE1E6"/>
+          <stop class="tg-a" offset="0%"/><stop class="tg-b" offset="100%"/>
         </linearGradient>
+        <!-- one rose bloom. Colours arrive as custom properties (--petal-1/2/3),
+             because plain CSS selectors cannot reach inside a <use> shadow tree
+             but inherited custom properties can. -->
+        <g id="rose">
+          <g fill="var(--petal-1,var(--warm))" opacity=".92">
+            <ellipse rx="7.4" ry="12.6" cy="-11"/>
+            <ellipse rx="7.4" ry="12.6" cy="-11" transform="rotate(60)"/>
+            <ellipse rx="7.4" ry="12.6" cy="-11" transform="rotate(120)"/>
+            <ellipse rx="7.4" ry="12.6" cy="-11" transform="rotate(180)"/>
+            <ellipse rx="7.4" ry="12.6" cy="-11" transform="rotate(240)"/>
+            <ellipse rx="7.4" ry="12.6" cy="-11" transform="rotate(300)"/>
+          </g>
+          <g fill="var(--petal-2,var(--petal-rose-2))">
+            <ellipse rx="5.2" ry="8.6" cy="-7" transform="rotate(30)"/>
+            <ellipse rx="5.2" ry="8.6" cy="-7" transform="rotate(90)"/>
+            <ellipse rx="5.2" ry="8.6" cy="-7" transform="rotate(150)"/>
+            <ellipse rx="5.2" ry="8.6" cy="-7" transform="rotate(210)"/>
+            <ellipse rx="5.2" ry="8.6" cy="-7" transform="rotate(270)"/>
+            <ellipse rx="5.2" ry="8.6" cy="-7" transform="rotate(330)"/>
+          </g>
+          <path fill="none" stroke="var(--petal-3,var(--petal-rose-3))" stroke-width="1.5" stroke-linecap="round"
+                d="M0-5.4A5.4 5.4 0 1 1-4.7 2.7 3.3 3.3 0 1 0 .2-1.9"/>
+        </g>
       </defs>
       <g class="thread-wrap" id="threadWrap">
-        <path id="thread" fill="none" stroke="url(#tg)" stroke-width="1.4" stroke-linecap="round" opacity=".75"/>
+        <path id="thread" fill="none" stroke="url(#tg)" stroke-width="1.4" stroke-linecap="round" opacity=".8"/>
       </g>
       <g class="orb-g" id="orbA" transform="translate(150,66)">
         <g class="drift-a">
-          <circle r="13" fill="#FF6B9D" filter="url(#glow)" opacity=".95"/>
-          <circle r="24" fill="none" stroke="#FF6B9D" stroke-width=".7" opacity=".28"/>
+          <circle class="bloom-halo halo-a" r="25"/>
+          <use href="#rose" class="bloom bloom-a" filter="url(#glow)"/>
         </g>
       </g>
       <g class="orb-g" id="orbB" transform="translate(250,66)">
         <g class="drift-b">
-          <circle r="13" fill="#5CE1E6" filter="url(#glow)" opacity=".95"/>
-          <circle r="24" fill="none" stroke="#5CE1E6" stroke-width=".7" opacity=".28"/>
+          <circle class="bloom-halo halo-b" r="25"/>
+          <use href="#rose" class="bloom bloom-b" filter="url(#glow)"/>
         </g>
       </g>
     </svg>
-    <div class="field-cap mono" id="fieldCap">the field · idle</div>
+    <div class="field-cap eyebrow" id="fieldCap">the field · idle</div>
   </div>
 
   <!-- ══════════ COVER ══════════ -->
   <div class="screen on" id="cover">
-    <div class="mono rise d1">Form 01 &nbsp;·&nbsp; candidate intake</div>
+    <div class="eyebrow rise d1">a small invitation</div>
     <h1 class="rise d2">Prox<em>i</em>mity</h1>
     <p class="lede rise d3">A field test for how you do closeness.</p>
 
@@ -479,15 +540,15 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
     <p class="note rise d4">Eighteen questions. No right answers and no score against anyone else — it plots you as a single point on those two axes. Nearly everything else about how a person loves follows from where that point lands.</p>
     <p class="note rise d5"><b>Nothing is saved or sent.</b> It runs entirely in this tab and there's no server behind it. Close it and it's gone — unless you choose to copy the shareable link at the end, which carries your answers in its address and nowhere else.</p>
 
-    <button class="cta rise d5" id="start">Start the intake <span class="arw">→</span></button>
+    <button class="cta rise d5" id="start">Let’s begin <span class="arw">→</span></button>
     <p class="note rise d5" style="margin-top:16px;font-size:13px">Answer on instinct, not on who you'd like to be. The instrument is only as good as the honesty.</p>
   </div>
 
   <!-- ══════════ QUIZ ══════════ -->
   <div class="screen" id="quiz">
     <header>
-      <div class="mono" id="counter">Intake 01 / 18</div>
-      <div class="mono" id="phase">calibrating</div>
+      <div class="eyebrow" id="counter">01 of 18</div>
+      <div class="eyebrow" id="phase">settling in</div>
     </header>
     <div class="bar"><span id="prog"></span></div>
 
@@ -504,39 +565,39 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
 
   <!-- ══════════ RESULTS ══════════ -->
   <div class="screen" id="results">
-    <div class="verdict-k rise d1">Result · your coordinate</div>
+    <div class="verdict-k rise d1">where you landed</div>
     <h2 class="verdict rise d2" id="styleName"></h2>
     <p class="tag rise d2" id="styleTag"></p>
 
     <div class="grid-card rise d3">
       <div class="map-row">
         <svg class="map" viewBox="0 0 236 236">
-          <rect x="26" y="10" width="100" height="100" fill="#F2C57C" opacity=".07"/>
-          <rect x="126" y="10" width="100" height="100" fill="#5CE1E6" opacity=".07"/>
-          <rect x="26" y="110" width="100" height="100" fill="#FF6B9D" opacity=".07"/>
-          <rect x="126" y="110" width="100" height="100" fill="#A78BFA" opacity=".09"/>
-          <line x1="26" y1="110" x2="226" y2="110" stroke="#3A3154" stroke-width="1"/>
-          <line x1="126" y1="10" x2="126" y2="210" stroke="#3A3154" stroke-width="1"/>
-          <rect x="26" y="10" width="200" height="200" fill="none" stroke="#3A3154" stroke-width="1"/>
-          <text x="34" y="24" fill="#F2C57C">SECURE</text>
-          <text x="134" y="24" fill="#5CE1E6">DISMISSIVE</text>
+          <rect x="26" y="10" width="100" height="100" fill="var(--gold)" opacity=".20"/>
+          <rect x="126" y="10" width="100" height="100" fill="var(--cool)" opacity=".20"/>
+          <rect x="26" y="110" width="100" height="100" fill="var(--warm)" opacity=".20"/>
+          <rect x="126" y="110" width="100" height="100" fill="var(--violet)" opacity=".22"/>
+          <line x1="26" y1="110" x2="226" y2="110" stroke="var(--line-hi)" stroke-width="1"/>
+          <line x1="126" y1="10" x2="126" y2="210" stroke="var(--line-hi)" stroke-width="1"/>
+          <rect x="26" y="10" width="200" height="200" fill="none" stroke="var(--line-hi)" stroke-width="1"/>
+          <text x="34" y="24" fill="var(--gold)">SECURE</text>
+          <text x="134" y="24" fill="var(--cool)">DISMISSIVE</text>
           <text x="34" y="203">ANXIOUS</text>
-          <text x="134" y="203" fill="#A78BFA">FEARFUL</text>
+          <text x="134" y="203" fill="var(--violet)">FEARFUL</text>
           <text x="26" y="226">← low avoidance</text>
           <text x="176" y="226">high →</text>
           <text x="14" y="208" transform="rotate(-90 14 208)">← high anxiety</text>
-          <circle id="youRing" cx="126" cy="110" r="6" fill="none" stroke="#EFEAF7" stroke-width="1.2"/>
-          <circle id="you" cx="126" cy="110" r="5.5" fill="#EFEAF7"/>
+          <circle id="youRing" cx="126" cy="110" r="6" fill="none" stroke="var(--text)" stroke-width="1.2"/>
+          <circle id="you" cx="126" cy="110" r="5.5" fill="var(--text)"/>
         </svg>
 
         <div class="readouts">
           <div class="meter">
-            <div class="top"><span style="color:var(--warm)">Anxiety</span><span class="val" id="anxV">0</span></div>
+            <div class="top"><span style="color:var(--warm-ink)">Anxiety</span><span class="val" id="anxV">0</span></div>
             <div class="track"><span id="anxBar" style="background:var(--warm)"></span></div>
             <p class="desc" id="anxD"></p>
           </div>
           <div class="meter">
-            <div class="top"><span style="color:var(--cool)">Avoidance</span><span class="val" id="avoV">0</span></div>
+            <div class="top"><span style="color:var(--cool-ink)">Avoidance</span><span class="val" id="avoV">0</span></div>
             <div class="track"><span id="avoBar" style="background:var(--cool)"></span></div>
             <p class="desc" id="avoD"></p>
           </div>
@@ -551,21 +612,21 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
     <section class="blk"><h3>The growth edge</h3><div id="edge"></div></section>
 
     <div class="share">
-      <div class="mono">Summary · yours to copy</div>
+      <div class="eyebrow">yours to keep</div>
       <p class="small" style="margin-top:8px">Nothing gets sent automatically. Copy this if you want to send it back.</p>
       <textarea id="summary" readonly onclick="this.select()"></textarea>
     </div>
 
     <div class="share">
-      <div class="mono">Shareable link · yours to send</div>
+      <div class="eyebrow">a link, if you want to send it</div>
       <p class="small" style="margin-top:8px">Still nothing sent to a server — this link carries your 18 answers in its address, nothing more. Anyone who opens it lands straight on this result page. Only share it with people you want seeing it.</p>
       <textarea id="shareLink" class="share-link" readonly onclick="this.select()"></textarea>
       <button class="copybtn" id="copyLink">Copy shareable link</button>
-      <span class="mono copystatus" id="copyStatus"></span>
+      <span class="eyebrow copystatus" id="copyStatus"></span>
     </div>
 
     <div class="invite">
-      <div class="mono">Part two &nbsp;·&nbsp; unlocked</div>
+      <div class="eyebrow">now the other half</div>
       <h4>Now find out what he is.</h4>
       <p>Seven chapters. His coordinate, where any of this comes from, why people end up where they end up — and what the two of you specifically are likely to do to each other. Roughly eight minutes.</p>
       <button class="cta" id="toJourney" style="margin-top:20px">Open the founder's file <span class="arw">→</span></button>
@@ -573,15 +634,15 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
 
     <div class="foot">
       <p class="small">Built on the two-factor model behind the <b>Experiences in Close Relationships</b> scale (Brennan, Clark &amp; Shaver; revised by Fraley et al.) — the standard adult attachment instrument. This is a short, informal adaptation: a good mirror and a conversation starter, not a diagnosis. Attachment is a pattern, not a personality, and patterns move.</p>
-      <button class="ghost" id="again" style="margin-top:14px">↺ Run it again</button>
+      <button class="ghost" id="again" style="margin-top:14px">take it again</button>
     </div>
   </div>
 
   <!-- ══════════ ACT TWO: JOURNEY ══════════ -->
   <div class="screen" id="journey">
     <div class="rail">
-      <div class="mono" id="chCount">Chapter 01 / 07</div>
-      <div class="mono" id="chKind">the file</div>
+      <div class="eyebrow" id="chCount">Chapter 01 / 07</div>
+      <div class="eyebrow" id="chKind">the file</div>
     </div>
     <div class="bar"><span id="chProg"></span></div>
 
@@ -745,7 +806,7 @@ const Q = [
 /* ══════════════════ PROFILES ══════════════════ */
 const P = {
   secure:{
-    name:"Secure", colour:"#F2C57C",
+    name:"Secure", colour:"var(--gold)", ink:"var(--gold-ink)",
     tag:"Closeness doesn't cost you much, and distance doesn't frighten you. Rarer than the internet suggests.",
     mech:["Your alarm system works the way it's supposed to: it fires at real threats and stays quiet the rest of the time. You can be close without dissolving into someone, and apart without assuming the worst — which sounds unremarkable until you watch how much of most people's energy goes into managing exactly that.",
           "The mechanism underneath is a working assumption that people are basically reachable. When something's wrong you expect that saying so will help rather than cost you. That single expectation removes the need for almost every strategy other styles have to run."],
@@ -760,7 +821,7 @@ const P = {
     edge:["Your growth edge isn't repair, it's discernment. Secure people often tolerate far more than they should, because they don't panic — so a slow-declining relationship doesn't set off alarms until it's very late. Steadiness can look identical to settling from the inside."]
   },
   anxious:{
-    name:"Anxious-Preoccupied", colour:"#FF6B9D",
+    name:"Anxious-Preoccupied", colour:"var(--warm)", ink:"var(--warm-ink)",
     tag:"You feel the relationship constantly — its temperature, its distance, its smallest change. Vigilance is the cost of caring this openly.",
     mech:["Your attachment system is set to a low activation threshold. Small cues — a slower reply, a flatter tone, a shifted plan — register as possible signals about the bond, and once the alarm fires, reassurance is the only thing that reliably switches it off.",
           "The important part: this isn't neediness. It's a nervous system that learned closeness was real but inconsistent, so it built excellent monitoring equipment. You are, genuinely, a more accurate reader of relational weather than most people. The cost is you can't turn the instrument off, so noise gets read as signal."],
@@ -776,7 +837,7 @@ const P = {
     edge:["Learning that the alarm going off is not the same as danger being present. The skill is sitting with an unanswered text for twenty minutes without converting the discomfort into action — because the action feels like relief and functions as pressure. Building sources of steadiness that don't route through one person is the long game."]
   },
   dismissive:{
-    name:"Dismissive-Avoidant", colour:"#5CE1E6",
+    name:"Dismissive-Avoidant", colour:"var(--cool)", ink:"var(--cool-ink)",
     tag:"Self-sufficient by design. Closeness registers as a tax you didn't agree to pay, and distance feels like oxygen.",
     mech:["You run deactivating strategies: minimising needs, resolving things internally, keeping a margin of independence that never gets fully closed. It works — you're genuinely competent alone, which is why the pattern is so hard to spot as a pattern rather than a preference.",
           "Underneath is usually an early lesson that needing things didn't reliably work, so the system stopped asking and built self-reliance instead. Not a character flaw. An adaptation that outlived the conditions it was designed for."],
@@ -792,7 +853,7 @@ const P = {
     edge:["Tolerating being witnessed. Not a grand confession — the small, unglamorous version: \u201cI'm depleted, it isn't about you, I don't need it fixed.\u201d That single sentence does the work of a hundred managed silences, and it's the only way you'll ever collect evidence that being seen low doesn't cost you the relationship."]
   },
   fearful:{
-    name:"Fearful-Avoidant", colour:"#A78BFA",
+    name:"Fearful-Avoidant", colour:"var(--violet)", ink:"var(--violet-ink)",
     tag:"You want closeness more than most people and have more evidence than most that it isn't safe. Both things are true at once, and that's the whole pattern.",
     mech:["You carry both systems, live. The anxious one wants contact and long-term stability. The avoidant one blocks exposure. So you reach, then flinch — and both moves are sincere, which is what makes this exhausting rather than merely inconsistent.",
           "This pattern is usually built by attachment that was real and then ruptured, rather than absent from the start. That's the crucial distinction: your template isn't \u201cconnection doesn't work.\u201d It's \u201cconnection is real, and then it ends without warning.\u201d Which means the danger zone isn't intimacy in general — it's the specific moment of being seen exposed, because vulnerability got encoded as the thing that comes right before loss."],
@@ -896,7 +957,7 @@ function decodeAnswers(str){
 
 /* ── the field: avoidance sets distance, anxiety sets tension ── */
 function paintField(anx, avo, settled){
-  const gap  = 34 + (avo/100)*118;          // 34 → 152 px apart
+  const gap  = 52 + (avo/100)*104;          // 52 → 156 px apart
   const ax_ = 200 - gap/2, bx = 200 + gap/2;
   el('orbA').setAttribute('transform', `translate(${ax_},66)`);
   el('orbB').setAttribute('transform', `translate(${bx},66)`);
@@ -911,18 +972,18 @@ function paintField(anx, avo, settled){
   el('threadWrap').style.animationDuration = (2.9 - (anx/100)*2.1).toFixed(2) + 's';
 
   el('fieldCap').textContent = settled
-    ? `distance ${avo} · tension ${anx}`
-    : (answers.filter(a=>a!==null).length ? 'the field · reading' : 'the field · idle');
+    ? `${avo} apart · ${anx} pull`
+    : (answers.filter(a=>a!==null).length ? 'reading you' : 'two people, one thread');
 }
 
 /* ── render one question ── */
 function render(){
   const q = Q[i];
-  el('counter').textContent = `Intake ${String(i+1).padStart(2,'0')} / ${Q.length}`;
-  el('qnum').textContent = `Q${String(i+1).padStart(2,'0')}`;
+  el('counter').textContent = `${String(i+1).padStart(2,'0')} of ${Q.length}`;
+  el('qnum').textContent = String(i+1).padStart(2,'0');
   el('qtext').textContent = q.t;
   el('prog').style.width = (i/Q.length*100) + '%';
-  el('phase').textContent = i < 6 ? 'calibrating' : i < 13 ? 'mapping' : 'converging';
+  el('phase').textContent = i < 6 ? 'settling in' : i < 13 ? 'getting warmer' : 'almost there';
   el('back').style.visibility = i === 0 ? 'hidden' : 'visible';
 
   const box = el('opts');
@@ -957,7 +1018,7 @@ function finish(){
   RESULT = {key, anx, avo};
 
   el('styleName').textContent = p.name;
-  el('styleName').style.color = p.colour;
+  el('styleName').style.color = p.ink;
   el('styleTag').textContent = p.tag;
 
   el('anxV').textContent = anx;
@@ -1133,7 +1194,7 @@ const CH = [
       return `
       <div class="pairbox">
         <div class="lbl">Founder · coordinate on record</div>
-        <h4 style="color:${me.colour}">${me.name}</h4>
+        <h4 style="color:${me.ink}">${me.name}</h4>
         <div class="dyad">
           <span class="chip"><i style="background:${me.colour}"></i>${FOUNDER.name} · anx ${FOUNDER.anx} · avo ${FOUNDER.avo}</span>
           <span class="chip"><i style="background:${P[RESULT.key].colour}"></i>You · anx ${RESULT.anx} · avo ${RESULT.avo}</span>
@@ -1160,25 +1221,25 @@ const CH = [
       <p>Everything you saw plotted on that grid resolves into four regions. Read them as strategies, because that's what they are — each one is the correct solution to a specific set of childhood conditions, still running long after the conditions changed.</p>
       <div class="quad">
         <div class="cell">
-          <div class="k" style="color:var(--gold)">Secure</div>
+          <div class="k" style="color:var(--gold-ink)">Secure</div>
           <div class="step"><b>Conditions:</b> comfort arrived reliably enough.</div>
           <div class="step"><b>Lesson:</b> asking works.</div>
           <div class="step"><b>Adult:</b> can be close without dissolving, apart without alarm.</div>
         </div>
         <div class="cell">
-          <div class="k" style="color:var(--warm)">Anxious-preoccupied</div>
+          <div class="k" style="color:var(--warm-ink)">Anxious-preoccupied</div>
           <div class="step"><b>Conditions:</b> comfort was real but inconsistent.</div>
           <div class="step"><b>Lesson:</b> stay alert, escalate — sometimes that's what works.</div>
           <div class="step"><b>Adult:</b> excellent relational radar that won't switch off.</div>
         </div>
         <div class="cell">
-          <div class="k" style="color:var(--cool)">Dismissive-avoidant</div>
+          <div class="k" style="color:var(--cool-ink)">Dismissive-avoidant</div>
           <div class="step"><b>Conditions:</b> needing things reliably didn't work.</div>
           <div class="step"><b>Lesson:</b> stop asking. Handle it internally.</div>
           <div class="step"><b>Adult:</b> genuinely capable alone, allergic to exposure.</div>
         </div>
         <div class="cell">
-          <div class="k" style="color:var(--violet)">Fearful-avoidant</div>
+          <div class="k" style="color:var(--violet-ink)">Fearful-avoidant</div>
           <div class="step"><b>Conditions:</b> closeness was real, then ruptured. Or was itself the danger.</div>
           <div class="step"><b>Lesson:</b> both — reach, and protect.</div>
           <div class="step"><b>Adult:</b> wants it most, trusts it least.</div>
@@ -1262,20 +1323,20 @@ function dualMap(){
   /* anxiety increases downward — ANXIOUS/FEARFUL are the lower quadrants */
   const px = v => 26 + (v/100)*200, py = v => 10 + (v/100)*200;
   return `<svg class="map" style="width:100%;max-width:260px;height:auto;margin:16px auto 0;display:block" viewBox="0 0 236 236">
-    <rect x="26" y="10" width="100" height="100" fill="#F2C57C" opacity=".07"/>
-    <rect x="126" y="10" width="100" height="100" fill="#5CE1E6" opacity=".07"/>
-    <rect x="26" y="110" width="100" height="100" fill="#FF6B9D" opacity=".07"/>
-    <rect x="126" y="110" width="100" height="100" fill="#A78BFA" opacity=".09"/>
-    <line x1="26" y1="110" x2="226" y2="110" stroke="#3A3154"/>
-    <line x1="126" y1="10" x2="126" y2="210" stroke="#3A3154"/>
-    <rect x="26" y="10" width="200" height="200" fill="none" stroke="#3A3154"/>
-    <text x="34" y="24" fill="#F2C57C">SECURE</text>
-    <text x="134" y="24" fill="#5CE1E6">DISMISSIVE</text>
+    <rect x="26" y="10" width="100" height="100" fill="var(--gold)" opacity=".20"/>
+    <rect x="126" y="10" width="100" height="100" fill="var(--cool)" opacity=".20"/>
+    <rect x="26" y="110" width="100" height="100" fill="var(--warm)" opacity=".20"/>
+    <rect x="126" y="110" width="100" height="100" fill="var(--violet)" opacity=".22"/>
+    <line x1="26" y1="110" x2="226" y2="110" stroke="var(--line-hi)"/>
+    <line x1="126" y1="10" x2="126" y2="210" stroke="var(--line-hi)"/>
+    <rect x="26" y="10" width="200" height="200" fill="none" stroke="var(--line-hi)"/>
+    <text x="34" y="24" fill="var(--gold)">SECURE</text>
+    <text x="134" y="24" fill="var(--cool)">DISMISSIVE</text>
     <text x="34" y="203">ANXIOUS</text>
-    <text x="134" y="203" fill="#A78BFA">FEARFUL</text>
+    <text x="134" y="203" fill="var(--violet)">FEARFUL</text>
     <text x="26" y="226">← low avoidance</text><text x="176" y="226">high →</text>
     <line x1="${px(RESULT.avo)}" y1="${py(RESULT.anx)}" x2="${px(FOUNDER.avo)}" y2="${py(FOUNDER.anx)}"
-          stroke="#6B6288" stroke-width="1" stroke-dasharray="3 4"/>
+          stroke="var(--muted-2)" stroke-width="1" stroke-dasharray="3 4"/>
     <circle cx="${px(RESULT.avo)}" cy="${py(RESULT.anx)}" r="5.5" fill="${her.colour}"/>
     <circle cx="${px(FOUNDER.avo)}" cy="${py(FOUNDER.anx)}" r="5.5" fill="${his.colour}"/>
     <circle cx="${px(FOUNDER.avo)}" cy="${py(FOUNDER.anx)}" r="10" fill="none" stroke="${his.colour}" stroke-width=".8" opacity=".5"/>
@@ -1284,12 +1345,12 @@ function dualMap(){
 
 function loopSVG(){
   return `<svg class="loop" viewBox="0 0 300 150">
-    <circle cx="70" cy="75" r="30" fill="none" stroke="#FF6B9D" stroke-width="1.2" opacity=".8"/>
-    <circle cx="230" cy="75" r="30" fill="none" stroke="#5CE1E6" stroke-width="1.2" opacity=".8"/>
-    <text x="48" y="78" fill="#FF6B9D">PURSUE</text>
-    <text x="206" y="78" fill="#5CE1E6">WITHDRAW</text>
-    <path class="flow" d="M 100 62 Q 150 32 200 62" fill="none" stroke="#FF6B9D" stroke-width="1.3" opacity=".75"/>
-    <path class="flow" d="M 200 88 Q 150 118 100 88" fill="none" stroke="#5CE1E6" stroke-width="1.3" opacity=".75"/>
+    <circle cx="70" cy="75" r="30" fill="none" stroke="var(--warm)" stroke-width="1.2" opacity=".8"/>
+    <circle cx="230" cy="75" r="30" fill="none" stroke="var(--cool)" stroke-width="1.2" opacity=".8"/>
+    <text x="48" y="78" fill="var(--warm)">PURSUE</text>
+    <text x="206" y="78" fill="var(--cool)">WITHDRAW</text>
+    <path class="flow" d="M 100 62 Q 150 32 200 62" fill="none" stroke="var(--warm)" stroke-width="1.3" opacity=".75"/>
+    <path class="flow" d="M 200 88 Q 150 118 100 88" fill="none" stroke="var(--cool)" stroke-width="1.3" opacity=".75"/>
     <text x="112" y="26">presses for contact →</text>
     <text x="120" y="140">← retreats to cope</text>
   </svg>`;
@@ -1411,7 +1472,7 @@ if (new URLSearchParams(location.search).get('test') === '1'){
     panel.id = 'selfTestPanel';
     panel.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:9999;max-width:340px;max-height:70vh;'
       + 'overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;'
-      + 'padding:14px 16px;font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--text);'
+      + 'padding:14px 16px;font-family:var(--label);font-size:11px;line-height:1.6;color:var(--text);'
       + 'box-shadow:0 12px 30px -12px rgba(0,0,0,.6)';
     const statusColour = failed.length ? 'var(--warm)' : 'var(--cool)';
     panel.innerHTML = `<div style="font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:${statusColour};margin-bottom:8px">Self-test · ${results.length - failed.length}/${results.length} passed</div>`
