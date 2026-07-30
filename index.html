@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Proximity — a field test for how you do closeness</title>
+<meta name="description" content="Eighteen questions that map how you handle closeness. Two axes, one coordinate, no horoscopes." />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;1,9..40,400&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root{
+  --ink:#16121F;
+  --surface:#1F1930;
+  --surface-hi:#2A2240;
+  --line:#3A3154;
+  --text:#EFEAF7;
+  --muted:#9E95B6;
+  --warm:#FF6B9D;   /* anxiety axis */
+  --cool:#5CE1E6;   /* avoidance axis */
+  --gold:#F2C57C;   /* secure */
+  --violet:#A78BFA; /* fearful */
+  --display:'Bricolage Grotesque',system-ui,sans-serif;
+  --body:'DM Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--ink);color:var(--text);font-family:var(--body)}
+body{
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(900px 500px at 15% -10%, rgba(255,107,157,.10), transparent 70%),
+    radial-gradient(900px 500px at 85% 0%, rgba(92,225,230,.09), transparent 70%);
+  background-attachment:fixed;
+}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px}
+
+.wrap{max-width:720px;margin:0 auto;padding:28px 20px 80px}
+.mono{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- the field: signature element ---------- */
+.field{position:relative;height:132px;margin:6px 0 22px}
+.field svg{width:100%;height:100%;overflow:visible;display:block}
+.orb-g{transition:transform 1.1s cubic-bezier(.22,1,.36,1)}
+.drift-a{animation:driftA 9s ease-in-out infinite}
+.drift-b{animation:driftB 11s ease-in-out infinite}
+@keyframes driftA{0%,100%{transform:translateY(-5px)}50%{transform:translateY(6px)}}
+@keyframes driftB{0%,100%{transform:translateY(6px)}50%{transform:translateY(-6px)}}
+#thread{transition:d 1.1s cubic-bezier(.22,1,.36,1), stroke-width .8s ease, opacity .8s ease}
+.thread-wrap{animation:hum 2.4s ease-in-out infinite}
+@keyframes hum{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
+.field-cap{position:absolute;bottom:-2px;left:0;right:0;text-align:center}
+
+/* ---------- header ---------- */
+header{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:10px}
+.bar{height:2px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:10px}
+.bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--warm),var(--violet),var(--cool));transition:width .5s cubic-bezier(.22,1,.36,1)}
+
+/* ---------- cover ---------- */
+.screen{display:none}
+.screen.on{display:block}
+.rise{opacity:0;transform:translateY(14px);animation:rise .7s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+.d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.25s}.d4{animation-delay:.35s}.d5{animation-delay:.45s}
+
+h1{
+  font-family:var(--display);font-weight:800;
+  font-size:clamp(52px,15vw,104px);line-height:.86;letter-spacing:-.045em;
+  margin:14px 0 12px;
+}
+h1 em{font-style:normal;color:var(--warm)}
+.lede{font-size:clamp(17px,4.4vw,21px);line-height:1.5;color:var(--text);max-width:34ch}
+.note{font-size:15px;line-height:1.65;color:var(--muted);margin-top:20px;max-width:52ch}
+.note b{color:var(--text);font-weight:500}
+
+.cta{
+  display:inline-flex;align-items:center;gap:12px;margin-top:30px;
+  background:var(--text);color:var(--ink);
+  font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  padding:16px 26px;border-radius:100px;
+  transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s ease;
+}
+.cta:hover{transform:translateY(-2px);box-shadow:0 12px 30px -12px rgba(255,107,157,.6)}
+.cta .arw{transition:transform .25s ease}
+.cta:hover .arw{transform:translateX(4px)}
+.ghost{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);padding:12px 0;transition:color .2s
+}
+.ghost:hover{color:var(--text)}
+
+.axes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:34px}
+.axis{border:1px solid var(--line);border-radius:14px;padding:16px}
+.axis .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+.axis p{font-size:14px;line-height:1.5;color:var(--muted);margin-top:8px}
+.axis.w .k{color:var(--warm)}.axis.c .k{color:var(--cool)}
+
+/* ---------- questions ---------- */
+.qnum{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--muted);margin-bottom:14px}
+.qtext{
+  font-family:var(--display);font-weight:600;
+  font-size:clamp(25px,6.6vw,38px);line-height:1.12;letter-spacing:-.025em;
+  margin-bottom:26px;max-width:26ch;
+}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{
+  display:flex;align-items:flex-start;gap:14px;text-align:left;
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:16px 18px;font-size:16px;line-height:1.4;
+  transition:background .18s ease, border-color .18s ease, transform .18s cubic-bezier(.22,1,.36,1);
+}
+.opt:hover{background:var(--surface-hi);border-color:#4E4372;transform:translateX(4px)}
+.opt .key{
+  flex:0 0 22px;height:22px;border-radius:6px;background:var(--surface-hi);
+  font-family:var(--mono);font-size:11px;font-weight:600;color:var(--muted);
+  display:grid;place-items:center;margin-top:1px;transition:background .18s,color .18s
+}
+.opt:hover .key{background:var(--warm);color:var(--ink)}
+.opt.picked{border-color:var(--gold);background:var(--surface-hi)}
+.qfoot{display:flex;justify-content:space-between;align-items:center;margin-top:22px}
+.hint{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6B6288}
+
+/* ---------- results ---------- */
+.verdict-k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.verdict{
+  font-family:var(--display);font-weight:800;
+  font-size:clamp(38px,10vw,66px);line-height:.94;letter-spacing:-.04em;margin:10px 0 14px;
+}
+.tag{font-size:clamp(17px,4.2vw,20px);line-height:1.45;color:var(--text);max-width:32ch}
+
+.grid-card{
+  margin:30px 0;border:1px solid var(--line);border-radius:18px;padding:20px;
+  background:linear-gradient(180deg,rgba(42,34,64,.6),rgba(31,25,48,.3));
+}
+.map-row{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.map{flex:0 0 auto;width:236px;height:236px;margin:0 auto}
+.map text{font-family:var(--mono);font-size:7.4px;letter-spacing:.1em;fill:var(--muted)}
+#you{transition:cx 1.2s cubic-bezier(.22,1,.36,1), cy 1.2s cubic-bezier(.22,1,.36,1)}
+#youRing{animation:ping 2.6s ease-out infinite;transform-origin:center}
+@keyframes ping{0%{r:6;opacity:.9}70%,100%{r:20;opacity:0}}
+.readouts{flex:1 1 190px;min-width:180px}
+.meter{margin-bottom:16px}
+.meter .top{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.meter .val{font-size:15px;font-weight:600;color:var(--text)}
+.track{height:5px;background:#241E38;border-radius:4px;margin-top:7px;overflow:hidden}
+.track span{display:block;height:100%;width:0;border-radius:4px;transition:width 1.2s cubic-bezier(.22,1,.36,1)}
+.meter .desc{font-size:13px;line-height:1.5;color:var(--muted);margin-top:8px}
+
+section.blk{border-top:1px solid var(--line);padding:22px 0}
+section.blk h3{
+  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:12px
+}
+section.blk p{font-size:16px;line-height:1.65;margin-bottom:12px}
+section.blk p:last-child{margin-bottom:0}
+section.blk ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+section.blk li{font-size:16px;line-height:1.55;padding-left:22px;position:relative}
+section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gold)}
+
+.lede-list{list-style:none;display:flex;flex-direction:column}
+.lede-list li{font-size:16px;padding-left:22px;position:relative}
+.lede-list li::before{content:'';position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gold);display:block}
+.lede-list--tight{gap:11px;margin:6px 0 18px}
+.lede-list--tight li{line-height:1.55}
+.lede-list--loose{gap:13px;margin:18px 0}
+.lede-list--loose li{line-height:1.6}
+
+.share{border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:24px;background:var(--surface)}
+.share textarea{
+  width:100%;min-height:132px;margin-top:12px;resize:vertical;
+  background:var(--ink);color:var(--text);border:1px solid var(--line);border-radius:10px;
+  padding:14px;font-family:var(--mono);font-size:12px;line-height:1.75
+}
+.share textarea.share-link{min-height:auto;resize:none;white-space:nowrap;overflow-x:auto}
+.share .copybtn{
+  margin-top:12px;border:1px solid var(--line);border-radius:100px;padding:10px 20px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text);transition:border-color .2s,color .2s
+}
+.share .copybtn:hover{border-color:var(--gold);color:var(--gold)}
+.share .copystatus{margin-left:12px}
+.small{font-size:13px;line-height:1.6;color:var(--muted)}
+.foot{border-top:1px solid var(--line);margin-top:30px;padding-top:18px}
+
+/* ---------- act two: the journey ---------- */
+.invite{
+  margin-top:26px;border:1px solid #4E4372;border-radius:18px;padding:22px;
+  background:linear-gradient(150deg,rgba(167,139,250,.13),rgba(92,225,230,.06));
+}
+.invite h4{font-family:var(--display);font-weight:600;font-size:22px;line-height:1.2;letter-spacing:-.02em;margin:10px 0 8px}
+.invite p{font-size:15px;line-height:1.6;color:var(--muted)}
+
+.rail{display:flex;justify-content:space-between;align-items:baseline;gap:14px}
+.chnum{
+  font-family:var(--display);font-weight:800;font-size:clamp(64px,20vw,132px);
+  line-height:.8;letter-spacing:-.06em;color:transparent;
+  -webkit-text-stroke:1px var(--line);margin:18px 0 -6px;user-select:none
+}
+.chtitle{
+  font-family:var(--display);font-weight:600;
+  font-size:clamp(29px,7.4vw,44px);line-height:1.08;letter-spacing:-.03em;
+  margin-bottom:18px;max-width:24ch
+}
+.chbody p{font-size:16.5px;line-height:1.7;color:#DCD5EB;margin-bottom:15px;max-width:62ch}
+.chbody p:last-child{margin-bottom:0}
+.chbody p b{color:var(--text);font-weight:500}
+.pull{
+  border-left:2px solid var(--gold);padding:2px 0 2px 18px;margin:22px 0;
+  font-family:var(--display);font-weight:400;font-size:clamp(19px,4.8vw,23px);
+  line-height:1.35;letter-spacing:-.02em;color:var(--text);max-width:34ch
+}
+.cite{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6B6288;margin-top:8px}
+
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}
+.quad .cell{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--surface)}
+.quad .cell .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px}
+.quad .cell .step{font-size:14px;line-height:1.5;color:var(--muted);margin-bottom:7px}
+.quad .cell .step b{color:#DCD5EB;font-weight:500}
+
+.loop{width:100%;max-width:400px;margin:24px auto;display:block}
+.loop text{font-family:var(--mono);font-size:8px;letter-spacing:.1em;fill:var(--muted)}
+.loop .flow{stroke-dasharray:5 7;animation:flow 2.4s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-24}}
+
+.pairbox{border:1px solid #4E4372;border-radius:18px;padding:22px;margin:22px 0;background:var(--surface)}
+.pairbox .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.pairbox h4{font-family:var(--display);font-weight:700;font-size:clamp(24px,6vw,32px);line-height:1.1;letter-spacing:-.03em;margin:10px 0 14px}
+.dyad{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line);border-radius:100px;padding:7px 13px}
+.chip i{width:8px;height:8px;border-radius:50%;display:block}
+
+.chnav{display:flex;justify-content:space-between;align-items:center;gap:14px;border-top:1px solid var(--line);margin-top:32px;padding-top:18px}
+.nx{
+  display:inline-flex;align-items:center;gap:10px;background:var(--text);color:var(--ink);
+  font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  padding:14px 22px;border-radius:100px;transition:transform .25s cubic-bezier(.22,1,.36,1)
+}
+.nx:hover{transform:translateY(-2px)}
+.dots{display:flex;gap:6px}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--line);display:block;transition:background .3s,transform .3s}
+.dots i.on{background:var(--gold);transform:scale(1.35)}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .rise{opacity:1;transform:none}
+}
+
+@media (hover:none) and (pointer:coarse){
+  .hint{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ══════════ FIELD (persistent) ══════════ -->
+  <div class="field" id="field" aria-hidden="true">
+    <svg viewBox="0 0 400 132" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <filter id="glow" x="-120%" y="-120%" width="340%" height="340%">
+          <feGaussianBlur stdDeviation="7" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <linearGradient id="tg" x1="0" x2="1">
+          <stop offset="0%" stop-color="#FF6B9D"/><stop offset="100%" stop-color="#5CE1E6"/>
+        </linearGradient>
+      </defs>
+      <g class="thread-wrap" id="threadWrap">
+        <path id="thread" fill="none" stroke="url(#tg)" stroke-width="1.4" stroke-linecap="round" opacity=".75"/>
+      </g>
+      <g class="orb-g" id="orbA" transform="translate(150,66)">
+        <g class="drift-a">
+          <circle r="13" fill="#FF6B9D" filter="url(#glow)" opacity=".95"/>
+          <circle r="24" fill="none" stroke="#FF6B9D" stroke-width=".7" opacity=".28"/>
+        </g>
+      </g>
+      <g class="orb-g" id="orbB" transform="translate(250,66)">
+        <g class="drift-b">
+          <circle r="13" fill="#5CE1E6" filter="url(#glow)" opacity=".95"/>
+          <circle r="24" fill="none" stroke="#5CE1E6" stroke-width=".7" opacity=".28"/>
+        </g>
+      </g>
+    </svg>
+    <div class="field-cap mono" id="fieldCap">the field · idle</div>
+  </div>
+
+  <!-- ══════════ COVER ══════════ -->
+  <div class="screen on" id="cover">
+    <div class="mono rise d1">Form 01 &nbsp;·&nbsp; candidate intake</div>
+    <h1 class="rise d2">Prox<em>i</em>mity</h1>
+    <p class="lede rise d3">A field test for how you do closeness.</p>
+
+    <div class="axes rise d4">
+      <div class="axis w">
+        <div class="k">Axis I — anxiety</div>
+        <p>How much of your attention goes to whether you're about to be left.</p>
+      </div>
+      <div class="axis c">
+        <div class="k">Axis II — avoidance</div>
+        <p>How far you'll go to keep from being fully known.</p>
+      </div>
+    </div>
+
+    <p class="note rise d4">Eighteen questions. No right answers and no score against anyone else — it plots you as a single point on those two axes. Nearly everything else about how a person loves follows from where that point lands.</p>
+    <p class="note rise d5"><b>Nothing is saved or sent.</b> It runs entirely in this tab and there's no server behind it. Close it and it's gone — unless you choose to copy the shareable link at the end, which carries your answers in its address and nowhere else.</p>
+
+    <button class="cta rise d5" id="start">Start the intake <span class="arw">→</span></button>
+    <p class="note rise d5" style="margin-top:16px;font-size:13px">Answer on instinct, not on who you'd like to be. The instrument is only as good as the honesty.</p>
+  </div>
+
+  <!-- ══════════ QUIZ ══════════ -->
+  <div class="screen" id="quiz">
+    <header>
+      <div class="mono" id="counter">Intake 01 / 18</div>
+      <div class="mono" id="phase">calibrating</div>
+    </header>
+    <div class="bar"><span id="prog"></span></div>
+
+    <div style="margin-top:26px">
+      <div class="qnum" id="qnum">Q01</div>
+      <h2 class="qtext" id="qtext"></h2>
+      <div class="opts" id="opts"></div>
+      <div class="qfoot">
+        <button class="ghost" id="back">← Back</button>
+        <div class="hint">Keys 1–4</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ RESULTS ══════════ -->
+  <div class="screen" id="results">
+    <div class="verdict-k rise d1">Result · your coordinate</div>
+    <h2 class="verdict rise d2" id="styleName"></h2>
+    <p class="tag rise d2" id="styleTag"></p>
+
+    <div class="grid-card rise d3">
+      <div class="map-row">
+        <svg class="map" viewBox="0 0 236 236">
+          <rect x="26" y="10" width="100" height="100" fill="#F2C57C" opacity=".07"/>
+          <rect x="126" y="10" width="100" height="100" fill="#5CE1E6" opacity=".07"/>
+          <rect x="26" y="110" width="100" height="100" fill="#FF6B9D" opacity=".07"/>
+          <rect x="126" y="110" width="100" height="100" fill="#A78BFA" opacity=".09"/>
+          <line x1="26" y1="110" x2="226" y2="110" stroke="#3A3154" stroke-width="1"/>
+          <line x1="126" y1="10" x2="126" y2="210" stroke="#3A3154" stroke-width="1"/>
+          <rect x="26" y="10" width="200" height="200" fill="none" stroke="#3A3154" stroke-width="1"/>
+          <text x="34" y="24" fill="#F2C57C">SECURE</text>
+          <text x="134" y="24" fill="#5CE1E6">DISMISSIVE</text>
+          <text x="34" y="203">ANXIOUS</text>
+          <text x="134" y="203" fill="#A78BFA">FEARFUL</text>
+          <text x="26" y="226">← low avoidance</text>
+          <text x="176" y="226">high →</text>
+          <text x="14" y="208" transform="rotate(-90 14 208)">← high anxiety</text>
+          <circle id="youRing" cx="126" cy="110" r="6" fill="none" stroke="#EFEAF7" stroke-width="1.2"/>
+          <circle id="you" cx="126" cy="110" r="5.5" fill="#EFEAF7"/>
+        </svg>
+
+        <div class="readouts">
+          <div class="meter">
+            <div class="top"><span style="color:var(--warm)">Anxiety</span><span class="val" id="anxV">0</span></div>
+            <div class="track"><span id="anxBar" style="background:var(--warm)"></span></div>
+            <p class="desc" id="anxD"></p>
+          </div>
+          <div class="meter">
+            <div class="top"><span style="color:var(--cool)">Avoidance</span><span class="val" id="avoV">0</span></div>
+            <div class="track"><span id="avoBar" style="background:var(--cool)"></span></div>
+            <p class="desc" id="avoD"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="blk"><h3>What's actually happening</h3><div id="mech"></div></section>
+    <section class="blk"><h3>Under conflict</h3><div id="conflict"></div></section>
+    <section class="blk"><h3>What you need — often without asking</h3><ul id="needs"></ul></section>
+    <section class="blk"><h3>Dating you: the operating manual</h3><ul id="manual"></ul></section>
+    <section class="blk"><h3>The growth edge</h3><div id="edge"></div></section>
+
+    <div class="share">
+      <div class="mono">Summary · yours to copy</div>
+      <p class="small" style="margin-top:8px">Nothing gets sent automatically. Copy this if you want to send it back.</p>
+      <textarea id="summary" readonly onclick="this.select()"></textarea>
+    </div>
+
+    <div class="share">
+      <div class="mono">Shareable link · yours to send</div>
+      <p class="small" style="margin-top:8px">Still nothing sent to a server — this link carries your 18 answers in its address, nothing more. Anyone who opens it lands straight on this result page. Only share it with people you want seeing it.</p>
+      <textarea id="shareLink" class="share-link" readonly onclick="this.select()"></textarea>
+      <button class="copybtn" id="copyLink">Copy shareable link</button>
+      <span class="mono copystatus" id="copyStatus"></span>
+    </div>
+
+    <div class="invite">
+      <div class="mono">Part two &nbsp;·&nbsp; unlocked</div>
+      <h4>Now find out what he is.</h4>
+      <p>Seven chapters. His coordinate, where any of this comes from, why people end up where they end up — and what the two of you specifically are likely to do to each other. Roughly eight minutes.</p>
+      <button class="cta" id="toJourney" style="margin-top:20px">Open the founder's file <span class="arw">→</span></button>
+    </div>
+
+    <div class="foot">
+      <p class="small">Built on the two-factor model behind the <b>Experiences in Close Relationships</b> scale (Brennan, Clark &amp; Shaver; revised by Fraley et al.) — the standard adult attachment instrument. This is a short, informal adaptation: a good mirror and a conversation starter, not a diagnosis. Attachment is a pattern, not a personality, and patterns move.</p>
+      <button class="ghost" id="again" style="margin-top:14px">↺ Run it again</button>
+    </div>
+  </div>
+
+  <!-- ══════════ ACT TWO: JOURNEY ══════════ -->
+  <div class="screen" id="journey">
+    <div class="rail">
+      <div class="mono" id="chCount">Chapter 01 / 07</div>
+      <div class="mono" id="chKind">the file</div>
+    </div>
+    <div class="bar"><span id="chProg"></span></div>
+
+    <div class="chnum" id="chNum">01</div>
+    <h2 class="chtitle" id="chTitle"></h2>
+    <div class="chbody" id="chBody"></div>
+
+    <div class="chnav">
+      <button class="ghost" id="chBack">← Back</button>
+      <div class="dots" id="chDots"></div>
+      <button class="nx" id="chNext">Next <span class="arw">→</span></button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   CONFIG — edit this block. It's you.
+   ══════════════════════════════════════════════════════════
+   Change anx/avo/key if your own result differs, and rewrite
+   the note in your own voice — it lands far harder in your
+   words than in anyone else's.
+
+   quadrantKey() is declared further down (it's hoisted, safe to
+   call here) — if key doesn't match what anx/avo implies, the
+   console will warn rather than silently rendering a wrong
+   pairing on the "you two" chapter.                            */
+const FOUNDER = {
+  name: "Holiday",
+  anx: 62,
+  avo: 76,
+  key: "fearful",
+  note: [
+    "Fearful-avoidant. High on both axes, which is the least convenient combination available.",
+    "Both my parents died in a car accident when I was twelve. My brother, my sister and I were adopted, and then moved out somewhere between eighteen and twenty. So the template isn't <b>people don't show up</b> — they did, I remember it clearly. The template is <b>this is real, and then it ends, and nobody warns you.</b>",
+    "What that built: I'm the anchor. Always. If I'm down, everyone's down — so I don't get to be down. After a long day I'd rather have a drink and arrive composed than arrive honestly tired. That isn't strength, it's a very well-engineered way of never being seen at low tide.",
+    "I'm telling you this at the front rather than letting you discover it in month eight. That's the whole point of this thing."
+  ]
+};
+
+(function validateFounder(){
+  const implied = quadrantKey(FOUNDER.anx, FOUNDER.avo);
+  if (implied !== FOUNDER.key){
+    console.warn(`FOUNDER config mismatch: key is "${FOUNDER.key}" but anx ${FOUNDER.anx} / avo ${FOUNDER.avo} implies "${implied}". Fix FOUNDER.key or the coordinate — otherwise the "you two" chapter will pair against the wrong dynamic.`);
+  }
+})();
+
+/* ══════════════════ ITEMS ══════════════════
+   Each option carries a load on two axes:
+   ax = attachment anxiety, av = attachment avoidance.        */
+const Q = [
+  { t:"They take six hours to reply to a text they'd normally answer in two minutes.", o:[
+    {l:"I assume they're busy and carry on with my day.", ax:0, av:0},
+    {l:"I reread my last message to check what I said wrong.", ax:2, av:0},
+    {l:"I notice, decide not to care, and don't raise it.", ax:0, av:2},
+    {l:"I feel it in my stomach — and still say nothing.", ax:2, av:2}]},
+
+  { t:"First real fight is over. Two hours later, where are you?", o:[
+    {l:"Wanting to talk until we're properly okay again.", ax:1, av:-1},
+    {l:"Needing space before I can say anything useful.", ax:0, av:2},
+    {l:"Fine. It was a fight, not a referendum on us.", ax:0, av:0},
+    {l:"Replaying it, unsure whether we're still okay.", ax:2, av:1}]},
+
+  { t:"Someone tells you they're falling for you. Gut reaction, not the polite one.", o:[
+    {l:"Warm. I say it back if it's true.", ax:0, av:0},
+    {l:"Relief — finally, confirmation.", ax:2, av:0},
+    {l:"A small internal step backwards.", ax:0, av:2},
+    {l:"Both at once: thrilled, and locating the exit.", ax:2, av:2}]},
+
+  { t:"Your partner books a ten-day trip with their friends. Not you.", o:[
+    {l:"Good for them. I'll enjoy the quiet.", ax:0, av:0},
+    {l:"I'd want the itinerary. And the guest list.", ax:2, av:0},
+    {l:"Honestly? Relieved to get my own space back.", ax:0, av:2},
+    {l:"Supportive out loud, unsettled underneath.", ax:2, av:1}]},
+
+  { t:"Your relationship with the phrase \u201cwe need to talk\u201d.", o:[
+    {l:"Neutral. It's information, not a verdict.", ax:0, av:0},
+    {l:"Instant dread. I brace for the worst version.", ax:2, av:0},
+    {l:"Immediate urge to be anywhere else.", ax:0, av:2},
+    {l:"Dread, plus a strong urge to flee.", ax:2, av:2}]},
+
+  { t:"You're genuinely upset about something they did. What actually happens?", o:[
+    {l:"I tell them, reasonably soon, reasonably calmly.", ax:0, av:0},
+    {l:"I tell them — with more heat than I planned.", ax:2, av:0},
+    {l:"I file it away and say nothing.", ax:0, av:2},
+    {l:"I hint. Then say \u201cnothing's wrong\u201d when asked.", ax:1, av:2}]},
+
+  { t:"Being looked after while you're ill.", o:[
+    {l:"Lovely. I let them.", ax:0, av:0},
+    {l:"I want it — and I watch whether they offer.", ax:2, av:0},
+    {l:"I'd rather handle it alone. Less complicated.", ax:0, av:2},
+    {l:"I want it badly. I say I'm fine.", ax:2, av:2}]},
+
+  { t:"How many of your relationships ended because you slowly checked out rather than said the thing?", o:[
+    {l:"None. I said the thing.", ax:0, av:0},
+    {l:"One, maybe two.", ax:0, av:1},
+    {l:"Most of them, if I'm honest.", ax:0, av:2},
+    {l:"Mine ended the other way — I held on far too long.", ax:2, av:-1}]},
+
+  { t:"They've just met your friends. Walking home, you're mostly thinking about\u2026", o:[
+    {l:"Whether everyone had a good time.", ax:0, av:0},
+    {l:"Whether they liked me more or less after seeing that.", ax:2, av:0},
+    {l:"How soon I can get home and decompress.", ax:0, av:1},
+    {l:"Every small thing I said wrong.", ax:2, av:1}]},
+
+  { t:"A partner once told you: \u201cyou're hard to read.\u201d", o:[
+    {l:"Never heard it.", ax:0, av:0},
+    {l:"Heard it constantly.", ax:0, av:2},
+    {l:"Opposite problem — I'm extremely easy to read.", ax:1, av:-1},
+    {l:"Heard it. Took it as a compliment.", ax:0, av:2}]},
+
+  { t:"A serious problem in a relationship, to you, looks like\u2026", o:[
+    {l:"Us being unable to fix something together.", ax:0, av:0},
+    {l:"Feeling like I care noticeably more than they do.", ax:2, av:0},
+    {l:"Losing myself. Having no room to breathe.", ax:0, av:2},
+    {l:"Both — on rotation.", ax:2, av:2}]},
+
+  { t:"Someone new is consistent, available, and openly into you.", o:[
+    {l:"Great. That's the whole point.", ax:0, av:0},
+    {l:"Suspicious. Where's the catch?", ax:1, av:1},
+    {l:"Slightly bored, if I'm being honest.", ax:0, av:2},
+    {l:"I pull back — then miss them immediately.", ax:2, av:2}]},
+
+  { t:"How much of your ordinary day-to-day mood does a partner get to see?", o:[
+    {l:"Most of it. I'm not managing it.", ax:0, av:0},
+    {l:"All of it, immediately, possibly too much.", ax:2, av:0},
+    {l:"The edited version.", ax:0, av:2},
+    {l:"The highlight reel — and I quietly worry about the gap showing.", ax:2, av:2}]},
+
+  { t:"Thinking about your last breakup — what stings most?", o:[
+    {l:"Simply losing the person.", ax:0, av:0},
+    {l:"That they stopped wanting me.", ax:2, av:0},
+    {l:"How relieved I felt afterwards.", ax:0, av:2},
+    {l:"That I never let them see who I actually was.", ax:1, av:2}]},
+
+  { t:"Physical affection when you're stressed and stretched thin.", o:[
+    {l:"Helps enormously.", ax:0, av:0},
+    {l:"I need it, and I'll ask for it.", ax:1, av:-1},
+    {l:"Makes my skin crawl until I've reset alone.", ax:0, av:2},
+    {l:"I want it and can't bring myself to ask.", ax:2, av:1}]},
+
+  { t:"Your partner is in a bad mood and hasn't said why.", o:[
+    {l:"Ask, listen, don't take it personally.", ax:0, av:0},
+    {l:"Assume it's about me until proven otherwise.", ax:2, av:0},
+    {l:"Give them space — largely for my own comfort.", ax:0, av:2},
+    {l:"Overcorrect, fix everything, quietly resent it.", ax:2, av:1}]},
+
+  { t:"How long before someone gets the real version of you?", o:[
+    {l:"Fairly quickly. I don't have a second version.", ax:0, av:0},
+    {l:"Immediately. Arguably too fast.", ax:2, av:0},
+    {l:"Months. Years, possibly.", ax:0, av:2},
+    {l:"They get an excellent impression of the real version.", ax:1, av:2}]},
+
+  { t:"Finish it honestly. The thing I'm most afraid of in a relationship is\u2026", o:[
+    {l:"Not much, really. I'd be okay either way.", ax:0, av:1},
+    {l:"Being left.", ax:2, av:0},
+    {l:"Being trapped.", ax:0, av:2},
+    {l:"Being fully known.", ax:1, av:2}]}
+];
+
+/* ══════════════════ PROFILES ══════════════════ */
+const P = {
+  secure:{
+    name:"Secure", colour:"#F2C57C",
+    tag:"Closeness doesn't cost you much, and distance doesn't frighten you. Rarer than the internet suggests.",
+    mech:["Your alarm system works the way it's supposed to: it fires at real threats and stays quiet the rest of the time. You can be close without dissolving into someone, and apart without assuming the worst — which sounds unremarkable until you watch how much of most people's energy goes into managing exactly that.",
+          "The mechanism underneath is a working assumption that people are basically reachable. When something's wrong you expect that saying so will help rather than cost you. That single expectation removes the need for almost every strategy other styles have to run."],
+    conflict:["You stay in the room. You can hear something hard about yourself without it becoming a referendum on whether you're loved, which means you argue about the actual problem instead of about the relationship.",
+              "Your risk isn't blowing up — it's underestimating how loaded a normal conversation feels to someone whose nervous system doesn't share your baseline. What reads as \u201cjust asking\u201d to you can land as an interrogation."],
+    needs:["Directness. Hints are noise to you.",
+           "A partner who repairs after a rupture rather than waiting for it to fade.",
+           "Room to be close without it being a negotiation every time."],
+    manual:["Say what you mean. You'll take it at face value, which is a gift and occasionally a blind spot.",
+            "You're a stabilising presence for less secure partners — genuinely. But it isn't your job to be someone's entire regulation system.",
+            "Watch for the pattern where you keep choosing people who need managing. Being good at it isn't the same as wanting it."],
+    edge:["Your growth edge isn't repair, it's discernment. Secure people often tolerate far more than they should, because they don't panic — so a slow-declining relationship doesn't set off alarms until it's very late. Steadiness can look identical to settling from the inside."]
+  },
+  anxious:{
+    name:"Anxious-Preoccupied", colour:"#FF6B9D",
+    tag:"You feel the relationship constantly — its temperature, its distance, its smallest change. Vigilance is the cost of caring this openly.",
+    mech:["Your attachment system is set to a low activation threshold. Small cues — a slower reply, a flatter tone, a shifted plan — register as possible signals about the bond, and once the alarm fires, reassurance is the only thing that reliably switches it off.",
+          "The important part: this isn't neediness. It's a nervous system that learned closeness was real but inconsistent, so it built excellent monitoring equipment. You are, genuinely, a more accurate reader of relational weather than most people. The cost is you can't turn the instrument off, so noise gets read as signal."],
+    conflict:["You pursue. Resolving it now feels urgent because unresolved distance is physically uncomfortable — so you push, text again, keep talking, need the repair before you can settle.",
+              "With a withdrawing partner this creates the loop Sue Johnson mapped: you press for contact, they retreat to cope, their retreat raises your alarm, you press harder. Neither of you is wrong. The cycle runs itself."],
+    needs:["Reassurance offered before you have to ask for it — that's the one that actually lands.",
+           "Consistency over intensity. Predictable beats passionate.",
+           "A partner who says \u201cI need an hour, this isn't about us\u201d instead of just going quiet.",
+           "Explicit repair after conflict. Silence reads as verdict."],
+    manual:["When you go quiet without explanation, they will fill the gap with the worst available story. One sentence of context prevents hours of spiralling.",
+            "They'll notice your mood before you do. Denying it makes it worse — they trust the read over the words.",
+            "Their protest isn't manipulation. It's a bid for contact, wearing a bad outfit."],
+    edge:["Learning that the alarm going off is not the same as danger being present. The skill is sitting with an unanswered text for twenty minutes without converting the discomfort into action — because the action feels like relief and functions as pressure. Building sources of steadiness that don't route through one person is the long game."]
+  },
+  dismissive:{
+    name:"Dismissive-Avoidant", colour:"#5CE1E6",
+    tag:"Self-sufficient by design. Closeness registers as a tax you didn't agree to pay, and distance feels like oxygen.",
+    mech:["You run deactivating strategies: minimising needs, resolving things internally, keeping a margin of independence that never gets fully closed. It works — you're genuinely competent alone, which is why the pattern is so hard to spot as a pattern rather than a preference.",
+          "Underneath is usually an early lesson that needing things didn't reliably work, so the system stopped asking and built self-reliance instead. Not a character flaw. An adaptation that outlived the conditions it was designed for."],
+    conflict:["You withdraw, or you go analytical — which is withdrawal wearing a suit. Making the better argument is a way to stay in the conversation without being emotionally present in it.",
+              "Worth knowing: suppressing distress rather than showing it doesn't calm your partner down. Butler and Gross found it raises the other person's physiological stress — because humans read incongruence fast, and \u201csomething is wrong and I'm not being told\u201d is far more alarming than the thing itself."],
+    needs:["Space that's granted rather than fought for.",
+           "A partner who doesn't read your solitude as rejection.",
+           "Low-pressure closeness — side by side beats face to face.",
+           "Being wanted without being required."],
+    manual:["Don't chase the silence. Ask for a return time instead: \u201ctake your hour, find me after.\u201d",
+            "You're not cold. You're regulating. But you'll need to say that out loud, because it looks identical to indifference from outside.",
+            "Pressure produces more distance, every time. Patience produces movement."],
+    edge:["Tolerating being witnessed. Not a grand confession — the small, unglamorous version: \u201cI'm depleted, it isn't about you, I don't need it fixed.\u201d That single sentence does the work of a hundred managed silences, and it's the only way you'll ever collect evidence that being seen low doesn't cost you the relationship."]
+  },
+  fearful:{
+    name:"Fearful-Avoidant", colour:"#A78BFA",
+    tag:"You want closeness more than most people and have more evidence than most that it isn't safe. Both things are true at once, and that's the whole pattern.",
+    mech:["You carry both systems, live. The anxious one wants contact and long-term stability. The avoidant one blocks exposure. So you reach, then flinch — and both moves are sincere, which is what makes this exhausting rather than merely inconsistent.",
+          "This pattern is usually built by attachment that was real and then ruptured, rather than absent from the start. That's the crucial distinction: your template isn't \u201cconnection doesn't work.\u201d It's \u201cconnection is real, and then it ends without warning.\u201d Which means the danger zone isn't intimacy in general — it's the specific moment of being seen exposed, because vulnerability got encoded as the thing that comes right before loss."],
+    conflict:["You may do both in sequence: press hard, then vanish. Or freeze — wanting to be reached for and unable to signal it, which reads from the outside as not caring.",
+              "Your defences often run redundantly: withdraw and perform fine and numb it. That's not casualness. That's a system treating the situation as high-threat, and it's expensive to run."],
+    needs:["Steadiness that doesn't flinch when you flinch.",
+           "Being pursued gently rather than not at all.",
+           "Explicit permission to be low without it becoming a crisis.",
+           "Predictability. Surprise reads as threat, even good surprise."],
+    manual:["Your pulling away is rarely about them. Saying that out loud is the single highest-leverage thing you can do.",
+            "You'll test the relationship — often without meaning to. Someone who passes calmly, repeatedly, changes your baseline over time.",
+            "Reassurance won't land the first time. Or the fifth. Repetition is the mechanism, not the failure."],
+    edge:["Running the experiment you've never actually run: being visibly low with someone, without simultaneously suppressing, distancing, or performing through it. Every time you've \u201cbeen seen at your worst,\u201d it came bundled with a defence — which means you've never collected clean data on how someone responds to the undefended version. Until you do, \u201cpeople can't handle me low\u201d stays a hypothesis wearing the costume of a conclusion."]
+  }
+};
+
+const ANX_D = [
+  [0,25,"Low. A slower reply is a slower reply. You're not scanning for signals."],
+  [25,50,"Moderate. You notice shifts, and you can usually let them go."],
+  [50,75,"Elevated. Distance registers physically, and reassurance is what resolves it."],
+  [75,101,"High. The relationship's temperature is always in your peripheral vision."]
+];
+const AVO_D = [
+  [0,25,"Low. Being known doesn't feel like exposure. You let people in early."],
+  [25,50,"Moderate. Mostly open, with a reserve you keep for yourself."],
+  [50,75,"Elevated. Closeness has a cost, and you manage the dose."],
+  [75,101,"High. Independence is load-bearing. Being seen depleted is the hard part."]
+];
+const band = (v,t)=> (t.find(r=>v>=r[0]&&v<r[1])||t[0])[2];
+
+/* which of the four quadrants a coordinate falls in — shared by finish()
+   and the CONFIG validation guard at the top of the file */
+function quadrantKey(anx, avo){
+  return anx >= 50
+    ? (avo >= 50 ? 'fearful'  : 'anxious')
+    : (avo >= 50 ? 'dismissive' : 'secure');
+}
+
+/* ══════════════════ STATE ══════════════════ */
+let i = 0;
+const answers = new Array(Q.length).fill(null);
+
+const el = id => document.getElementById(id);
+const show = id => document.querySelectorAll('.screen')
+  .forEach(s => s.classList.toggle('on', s.id === id));
+
+const MAX = Q.reduce((a,q)=>({
+  ax: a.ax + Math.max(...q.o.map(o=>o.ax)),
+  av: a.av + Math.max(...q.o.map(o=>o.av))
+}),{ax:0,av:0});
+
+function tally(){
+  let ax=0, av=0, n=0;
+  answers.forEach((k,qi)=>{ if(k!==null){ ax+=Q[qi].o[k].ax; av+=Q[qi].o[k].av; n++; } });
+  const scale = n ? Q.length/n : 1;   // project partial progress onto full scale
+  return {
+    anx: Math.max(0, Math.min(100, Math.round(ax*scale/MAX.ax*100))),
+    avo: Math.max(0, Math.min(100, Math.round(av*scale/MAX.av*100))),
+    n
+  };
+}
+
+/* ── shareable link: pack 18 answers (2 bits each, 4 options) behind a
+   version byte so a future edit to the question bank can't silently
+   misread an old link ── */
+const HASH_VERSION = 1;
+
+function encodeAnswers(ans){
+  let bits = ans.map(a => a.toString(2).padStart(2,'0')).join('');
+  while (bits.length % 8 !== 0) bits += '0';   // pad to whole bytes
+  const bytes = [HASH_VERSION];
+  for (let i = 0; i < bits.length; i += 8) bytes.push(parseInt(bits.slice(i,i+8), 2));
+  const bin = String.fromCharCode(...bytes);
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+function decodeAnswers(str){
+  let b64;
+  try { b64 = str.replace(/-/g,'+').replace(/_/g,'/'); }
+  catch(e){ return { ok:false, reason:'malformed' }; }
+  while (b64.length % 4) b64 += '=';
+  let bin;
+  try { bin = atob(b64); }
+  catch(e){ return { ok:false, reason:'malformed' }; }
+  const bytes = Array.from(bin, c => c.charCodeAt(0));
+  const expectedBytes = 1 + Math.ceil(Q.length*2/8);   // version byte + packed payload
+  if (bytes.length !== expectedBytes) return { ok:false, reason:'malformed' };
+  if (bytes[0] !== HASH_VERSION) return { ok:false, reason:'version' };
+  let bits = '';
+  for (let i = 1; i < bytes.length; i++) bits += bytes[i].toString(2).padStart(8,'0');
+  const out = [];
+  for (let qi = 0; qi < Q.length; qi++){
+    const chunk = bits.slice(qi*2, qi*2+2);
+    if (chunk.length < 2) return { ok:false, reason:'truncated' };
+    const v = parseInt(chunk, 2);
+    if (!Number.isInteger(v) || v < 0 || v >= Q[qi].o.length) return { ok:false, reason:'range' };
+    out.push(v);
+  }
+  return { ok:true, answers: out };
+}
+
+/* ── the field: avoidance sets distance, anxiety sets tension ── */
+function paintField(anx, avo, settled){
+  const gap  = 34 + (avo/100)*118;          // 34 → 152 px apart
+  const ax_ = 200 - gap/2, bx = 200 + gap/2;
+  el('orbA').setAttribute('transform', `translate(${ax_},66)`);
+  el('orbB').setAttribute('transform', `translate(${bx},66)`);
+
+  const slack = (1 - anx/100) * 26;         // taut when anxious, slack when calm
+  const th = el('thread');
+  th.setAttribute('d', `M ${ax_} 66 Q 200 ${66+slack} ${bx} 66`);
+  th.setAttribute('stroke-width', (1.2 + (anx/100)*2.4).toFixed(2));
+  th.style.opacity = 0.45 + (anx/100)*0.5;
+
+  // higher anxiety → faster hum on the thread
+  el('threadWrap').style.animationDuration = (2.9 - (anx/100)*2.1).toFixed(2) + 's';
+
+  el('fieldCap').textContent = settled
+    ? `distance ${avo} · tension ${anx}`
+    : (answers.filter(a=>a!==null).length ? 'the field · reading' : 'the field · idle');
+}
+
+/* ── render one question ── */
+function render(){
+  const q = Q[i];
+  el('counter').textContent = `Intake ${String(i+1).padStart(2,'0')} / ${Q.length}`;
+  el('qnum').textContent = `Q${String(i+1).padStart(2,'0')}`;
+  el('qtext').textContent = q.t;
+  el('prog').style.width = (i/Q.length*100) + '%';
+  el('phase').textContent = i < 6 ? 'calibrating' : i < 13 ? 'mapping' : 'converging';
+  el('back').style.visibility = i === 0 ? 'hidden' : 'visible';
+
+  const box = el('opts');
+  box.innerHTML = '';
+  q.o.forEach((o,k)=>{
+    const b = document.createElement('button');
+    b.className = 'opt' + (answers[i] === k ? ' picked' : '');
+    b.innerHTML = `<span class="key">${k+1}</span><span>${o.l}</span>`;
+    b.onclick = ()=> pick(k);
+    box.appendChild(b);
+  });
+
+  const t = tally();
+  paintField(t.anx, t.avo, false);
+}
+
+function pick(k){
+  answers[i] = k;
+  const t = tally();
+  paintField(t.anx, t.avo, false);
+  setTimeout(()=>{
+    if (i < Q.length - 1){ i++; render(); }
+    else finish();
+  }, 190);
+}
+
+/* ── results ── */
+function finish(){
+  const {anx, avo} = tally();
+  const key = quadrantKey(anx, avo);
+  const p = P[key];
+  RESULT = {key, anx, avo};
+
+  el('styleName').textContent = p.name;
+  el('styleName').style.color = p.colour;
+  el('styleTag').textContent = p.tag;
+
+  el('anxV').textContent = anx;
+  el('avoV').textContent = avo;
+  el('anxD').textContent = band(anx, ANX_D);
+  el('avoD').textContent = band(avo, AVO_D);
+
+  el('mech').innerHTML     = p.mech.map(x=>`<p>${x}</p>`).join('');
+  el('conflict').innerHTML = p.conflict.map(x=>`<p>${x}</p>`).join('');
+  el('edge').innerHTML     = p.edge.map(x=>`<p>${x}</p>`).join('');
+  el('needs').innerHTML    = p.needs.map(x=>`<li>${x}</li>`).join('');
+  el('manual').innerHTML   = p.manual.map(x=>`<li>${x}</li>`).join('');
+
+  el('summary').value =
+`PROXIMITY — intake complete
+─────────────────────────────
+Result      ${p.name}
+Anxiety     ${anx}/100
+Avoidance   ${avo}/100
+
+${p.tag}
+
+Under conflict: ${p.conflict[0]}
+
+What I need: ${p.needs.join(' / ')}
+
+Growth edge: ${p.edge[0]}`;
+
+  el('shareLink').value = location.origin + location.pathname + '#r=' + encodeAnswers(answers);
+  el('copyStatus').textContent = '';
+
+  show('results');
+  window.scrollTo({top:0, behavior:'smooth'});
+
+  // plot the coordinate + settle the field
+  paintField(anx, avo, true);
+  el('you').setAttribute('cx', 26 + (avo/100)*200);
+  el('you').setAttribute('cy', 10 + ((100-anx)/100)*200);
+  el('youRing').setAttribute('cx', 26 + (avo/100)*200);
+  el('youRing').setAttribute('cy', 10 + ((100-anx)/100)*200);
+  el('you').setAttribute('fill', p.colour);
+  el('youRing').setAttribute('stroke', p.colour);
+
+  el('anxBar').style.width = anx + '%';
+  el('avoBar').style.width = avo + '%';
+}
+
+/* ── wiring ── */
+el('start').onclick = ()=>{ show('quiz'); render(); window.scrollTo({top:0}); };
+el('back').onclick  = ()=>{ if(i>0){ i--; render(); } };
+el('again').onclick = ()=>{
+  i = 0; answers.fill(null);
+  el('anxBar').style.width = '0'; el('avoBar').style.width = '0';
+  paintField(0,0,false);
+  history.replaceState(null, '', location.pathname + location.search);
+  show('cover'); window.scrollTo({top:0, behavior:'smooth'});
+};
+
+let copyStatusTimer;
+el('copyLink').onclick = ()=>{
+  const val = el('shareLink').value;
+  const showStatus = msg => {
+    el('copyStatus').textContent = msg;
+    clearTimeout(copyStatusTimer);
+    copyStatusTimer = setTimeout(()=>{ el('copyStatus').textContent = ''; }, 3000);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(val).then(
+      ()=> showStatus('Copied'),
+      ()=>{ el('shareLink').select(); showStatus('Selected — copy with your device’s copy command'); }
+    );
+  } else {
+    el('shareLink').select();
+    showStatus('Selected — copy with your device’s copy command');
+  }
+};
+
+document.addEventListener('keydown', e=>{
+  if (!el('quiz').classList.contains('on')) return;
+  if (e.key >= '1' && e.key <= '4'){
+    const n = +e.key - 1;
+    if (n < Q[i].o.length) pick(n);
+  }
+  if (e.key === 'Backspace' && i > 0){ e.preventDefault(); i--; render(); }
+});
+
+paintField(0, 0, false);
+
+/* ══════════════════════════════════════════════════════════
+   ACT TWO — THE JOURNEY
+   ══════════════════════════════════════════════════════════ */
+
+/* pairwise dynamics — keyed by the unordered pair */
+const PAIRS = {
+  "secure|secure":{
+    title:"The quiet one",
+    dyn:["Two people who can be close without disappearing and apart without alarm. Conflict is about the actual problem rather than about whether the relationship survives it.",
+         "It looks unremarkable from outside. That's what working looks like."],
+    trap:"Complacency. Neither of you panics, so a slow drift produces no alarm until it's very late. Steadiness and settling feel identical from the inside.",
+    fix:["Schedule the check-in you don't feel you need.","Treat boredom as data, not as failure.","Keep having the conversation about what you each want next."]
+  },
+  "anxious|secure":{
+    title:"The anchor and the antenna",
+    dyn:["One of you reads the relational weather constantly; the other doesn't need to. That asymmetry is workable — the secure partner can absorb activation without escalating, which is genuinely rare.",
+         "The antenna is accurate more often than they get credit for. The anchor is calmer than the antenna can quite believe."],
+    trap:"The secure partner starts pre-emptively managing the anxious one's alarm, and it slides into parenting. Meanwhile the anxious partner keeps asking a question that reassurance can't permanently answer.",
+    fix:["Offer reassurance before it's requested — unprompted lands, requested doesn't.","Say the timeline out loud: \u201cI need an hour, this isn't about us.\u201d","Anxious partner: build steadiness that doesn't route through one person."]
+  },
+  "dismissive|secure":{
+    title:"The open door",
+    dyn:["The secure partner doesn't read solitude as rejection, which removes the pressure that usually makes an avoidant retreat further. This is the pairing where avoidance most often loosens over time.",
+         "Closeness stops being a demand and becomes an option — which is exactly the condition under which an avoidant will choose it."],
+    trap:"The secure partner tolerates so much distance that the relationship quietly hollows out. Not panicking becomes not noticing.",
+    fix:["Ask for a return time rather than chasing: \u201ctake your hour, find me after.\u201d","Avoidant partner: narrate the withdrawal out loud, even badly.","Secure partner: state your needs plainly. Your calm can read as indifference."]
+  },
+  "fearful|secure":{
+    title:"The steady test",
+    dyn:["The fearful partner will reach and then flinch, repeatedly, and often without meaning to. The secure partner's ability not to flinch back is the single active ingredient here.",
+         "This is the pairing with the best odds of producing earned security — because it supplies exactly the thing the fearful partner has no evidence of: someone who stays through the ugly part."],
+    trap:"The secure partner reads the flinch as rejection and stops reaching. Or absorbs the testing indefinitely and quietly runs out.",
+    fix:["Repetition is the mechanism. Reassurance won't land the first time or the fifth.","Fearful partner: say \u201cthis is me, not you\u201d in real time — the whole game is in that sentence.","Secure partner: you're allowed limits. Steady isn't the same as endless."]
+  },
+  "anxious|anxious":{
+    title:"Two antennas",
+    dyn:["Enormous intensity, fast intimacy, and total mutual comprehension of the fear. Nobody has to explain why a slow reply matters.",
+         "Neither of you withdraws, so conflict escalates rather than freezing. Loud, but rarely cold."],
+    trap:"Mutual escalation. Two alarms feeding each other with no regulating party in the room, and reassurance-seeking on both sides at once — so both bids go unanswered.",
+    fix:["Agree a hard pause signal in advance, before you need it.","One person regulates first, by prior agreement, not by whoever cracks.","Separate outlets matter here more than in any other pairing."]
+  },
+  "anxious|dismissive":{
+    title:"The classic trap",
+    dyn:["The most common distressed pairing in the literature, and not by accident: the anxious partner's pursuit reads initially as devotion, and the avoidant's distance reads initially as strength.",
+         "Then it locks. Pursuit raises the need for space; space raises the need for contact. Each person's coping strategy is precisely the other's trigger."],
+    trap:"Pursue-withdraw, running on its own momentum. Eventually it stops needing a trigger — history is enough. Both partners are trying to feel safe, using the exact method that makes the other unsafe.",
+    fix:["Name the cycle out loud while it's happening. That single act breaks more of it than any content resolution.","Avoidant: give a return time, always. Anxious: honour it without testing it.","Address the pattern, never the incident. The incident is never the problem."]
+  },
+  "anxious|fearful":{
+    title:"Reach and recoil",
+    dyn:["The anxious partner pursues; the fearful partner both wants it and cannot hold still for it. So you get closeness in bursts followed by inexplicable retreat.",
+         "It's confusing rather than cold. The fearful partner's pull-back is genuinely not about wanting less."],
+    trap:"The anxious partner reads the retreat as evidence of not being wanted, and pursues harder — which raises the fearful partner's exposure alarm and produces more retreat. Both feel abandoned simultaneously.",
+    fix:["Pre-agree what a retreat means, while things are calm, so it isn't interpreted live.","Fearful partner: signal before you go, not after.","Anxious partner: the retreat is the alarm firing, not a verdict."]
+  },
+  "dismissive|dismissive":{
+    title:"The polite drift",
+    dyn:["Low conflict, high mutual respect for space, and a working relationship that can run for years without a serious fight.",
+         "Both of you are competent alone, so nothing ever forces the issue."],
+    trap:"The deadliest configuration in the research, and the least dramatic: withdraw-withdraw. Nobody initiates repair because neither of you experiences distance as urgent. It looks calm right up until it's over.",
+    fix:["Repair has to be scheduled. Neither of you will feel the pull to do it spontaneously.","Say the small thing out loud even when it doesn't feel necessary.","Treat comfortable silence as something to audit, not something to trust."]
+  },
+  "dismissive|fearful":{
+    title:"Two exits",
+    dyn:["Both of you protect against exposure, so neither pushes. The relationship has plenty of room and very little pressure.",
+         "The difference: the fearful partner wants closeness and is blocking it. The dismissive one is more genuinely fine without it — and that asymmetry is where the pain lives."],
+    trap:"The fearful partner reads the dismissive partner's genuine contentment with distance as confirmation they were right not to reach. The old rule gets proven again by someone who wasn't even trying to prove it.",
+    fix:["Say the want out loud, even though it's the hardest sentence available.","Dismissive partner: your neutrality reads as verdict. Volunteer more than feels necessary.","Distance you both chose is fine. Distance nobody chose is drift."]
+  },
+  "fearful|fearful":{
+    title:"Mirror, both directions",
+    dyn:["Total mutual recognition — neither of you has to explain the flinch, the wanting, or the exhaustion of running both systems at once.",
+         "You'll each recognise the other's pattern faster than any secure partner ever could."],
+    trap:"Simultaneous activation with nobody regulating. Both reach, both recoil, both read the other's recoil as proof. When it goes badly it goes badly fast — and the recognition that makes it feel like home is also what makes it hard to interrupt.",
+    fix:["Whoever notices the cycle first names it. That's the whole protocol.","Agree in advance that a retreat has a return time attached, non-negotiably.","External support helps here more than anywhere. Two alarms, no anchor."]
+  }
+};
+const pairKey = (a,b) => [a,b].sort().join('|');
+
+/* ── chapter content ── */
+const CH = [
+  { kind:"the file", title:"Before you go any further — this is what he is.",
+    build(){
+      const me = P[FOUNDER.key];
+      return `
+      <div class="pairbox">
+        <div class="lbl">Founder · coordinate on record</div>
+        <h4 style="color:${me.colour}">${me.name}</h4>
+        <div class="dyad">
+          <span class="chip"><i style="background:${me.colour}"></i>${FOUNDER.name} · anx ${FOUNDER.anx} · avo ${FOUNDER.avo}</span>
+          <span class="chip"><i style="background:${P[RESULT.key].colour}"></i>You · anx ${RESULT.anx} · avo ${RESULT.avo}</span>
+        </div>
+        ${dualMap()}
+      </div>
+      ${FOUNDER.note.map(x=>`<p>${x}</p>`).join('')}
+      <p>He filled in his own long before you filled in yours. That asymmetry was deliberate — you now know something about him that most people wouldn't get for months, and you know it before deciding anything.</p>
+      <div class="pull">The rest of this explains how coordinates like these get set in the first place. Then it comes back to the two dots above.</div>`;
+    }},
+
+  { kind:"origins", title:"Nobody chooses this. It gets installed.",
+    build(){ return `
+      <p>In the 1950s John Bowlby proposed something that was unfashionable at the time: that a child's need for closeness isn't a by-product of being fed and kept warm, it's a primary biological drive, on the same tier as hunger. Being alone, for a small human, is a survival-grade emergency.</p>
+      <p>His colleague Mary Ainsworth then went looking for evidence. She built the <b>Strange Situation</b> — a mother leaves a room with her toddler in it, then comes back. What Ainsworth found was that the interesting data wasn't in the distress at separation, which was nearly universal. It was in the <b>reunion</b>. Some children went straight to the parent, were comforted, and returned to playing. Some clung and stayed inconsolable. Some behaved as though the parent hadn't returned at all — busy with a toy, heart rate through the roof.</p>
+      <div class="pull">Three children, three strategies, one shared problem: what do you do with a need for someone who might not come?</div>
+      <p class="cite">Ainsworth et al., Patterns of Attachment, 1978</p>
+      <p>Each pattern was a rational response to accumulated evidence. If comfort had reliably arrived, you ask directly. If it arrived unpredictably, you escalate — because sometimes only the loud bid works. If it reliably didn't arrive, you stop asking and handle it yourself, because a bid that fails is worse than no bid at all.</p>
+      <p>Those strategies don't stay in the nursery. Bowlby called what they harden into an <b>internal working model</b> — an unconscious answer to two questions: <em>am I worth showing up for</em>, and <em>can other people be relied on</em>. It runs underneath adult relationships, in real time, without asking your opinion. Which is why insight alone changes so little: you're not arguing with a belief, you're arguing with a reflex.</p>`;
+    }},
+
+  { kind:"the four", title:"Four adaptations. Not four personalities.",
+    build(){ return `
+      <p>Everything you saw plotted on that grid resolves into four regions. Read them as strategies, because that's what they are — each one is the correct solution to a specific set of childhood conditions, still running long after the conditions changed.</p>
+      <div class="quad">
+        <div class="cell">
+          <div class="k" style="color:var(--gold)">Secure</div>
+          <div class="step"><b>Conditions:</b> comfort arrived reliably enough.</div>
+          <div class="step"><b>Lesson:</b> asking works.</div>
+          <div class="step"><b>Adult:</b> can be close without dissolving, apart without alarm.</div>
+        </div>
+        <div class="cell">
+          <div class="k" style="color:var(--warm)">Anxious-preoccupied</div>
+          <div class="step"><b>Conditions:</b> comfort was real but inconsistent.</div>
+          <div class="step"><b>Lesson:</b> stay alert, escalate — sometimes that's what works.</div>
+          <div class="step"><b>Adult:</b> excellent relational radar that won't switch off.</div>
+        </div>
+        <div class="cell">
+          <div class="k" style="color:var(--cool)">Dismissive-avoidant</div>
+          <div class="step"><b>Conditions:</b> needing things reliably didn't work.</div>
+          <div class="step"><b>Lesson:</b> stop asking. Handle it internally.</div>
+          <div class="step"><b>Adult:</b> genuinely capable alone, allergic to exposure.</div>
+        </div>
+        <div class="cell">
+          <div class="k" style="color:var(--violet)">Fearful-avoidant</div>
+          <div class="step"><b>Conditions:</b> closeness was real, then ruptured. Or was itself the danger.</div>
+          <div class="step"><b>Lesson:</b> both — reach, and protect.</div>
+          <div class="step"><b>Adult:</b> wants it most, trusts it least.</div>
+        </div>
+      </div>
+      <p>Two things worth holding onto. First, the intermittent conditions do more damage than the consistently poor ones — a variable schedule of reward is the same mechanism that makes slot machines difficult to walk away from. Predictable neglect can at least be adapted to. Unpredictable warmth trains you to keep watching forever.</p>
+      <p>Second, and this is the part people misuse: <b>none of these are character flaws.</b> A twelve-year-old who stops asking for comfort isn't cold, he's efficient. The adaptation was correct. The problem is that it's still deployed against people who never gave it a reason.</p>`;
+    }},
+
+  { kind:"the cycle", title:"Relationships don't usually die of incompatibility.",
+    build(){ return `
+      <p>Here's what the couples research keeps landing on from different directions: the thing that ends most relationships isn't the content of the fights. It's a pattern underneath them that neither person can see while it's running.</p>
+      <p>Sue Johnson, who developed Emotionally Focused Therapy, calls these <b>demon dialogues</b>. The most common is <b>pursue-withdraw</b>: one partner presses for contact, the other retreats to cope, the retreat raises the first one's alarm, so they press harder, so the other retreats further. Nobody is being cruel. Both are trying to feel safe. Each one's method is precisely the other's trigger.</p>
+      ${loopSVG()}
+      <p>The loop's dangerous property is that it becomes self-sustaining. Early on it needs a real trigger. Later it just needs history — enough repetitions and it fires on almost nothing, because both nervous systems have learned to anticipate it. Couples don't usually leave because the love ran out. They leave exhausted by a pattern neither of them could name.</p>
+      <p>There's a quieter variant that's worse: <b>withdraw-withdraw.</b> Both partners disengage, nobody initiates repair, and because nothing looks like conflict, it gets diagnosed extremely late. It presents as a calm relationship right up until it's finished.</p>
+      <div class="pull">It's the pattern that kills it. Not the person, not the fight, not the compatibility score.</div>
+      <p>John Gottman got to nearly the same place from behavioural observation rather than attachment theory. In his lab work, the strongest single predictor of a relationship ending wasn't frequency of conflict — plenty of stable couples fight constantly. It was <b>contempt</b>: eye-rolling, mockery, treating your partner as beneath you. And the couples who lasted maintained a heavy surplus of positive to negative interaction during conflict, somewhere around five to one.</p>
+      <p class="cite">Johnson, Hold Me Tight · Gottman, The Seven Principles</p>
+      <p>One more finding worth having, because it overturns most people's instinct. James Butler and Emily Gross studied emotional <b>suppression</b> in couples — hiding distress rather than showing it. Suppressing didn't spare the partner. It raised the partner's physiological stress, in some conditions more than the plain expression of distress would have. Humans detect incongruence quickly, and <em>something is wrong and I'm not being told what</em> is more alarming than the thing itself.</p>
+      <p>Which means the composed version of someone having a bad day is often the more expensive gift.</p>`;
+    }},
+
+  { kind:"you two", title:"So: the two dots.",
+    build(){
+      const pk = pairKey(RESULT.key, FOUNDER.key);
+      const pr = PAIRS[pk];
+      const a = P[RESULT.key], b = P[FOUNDER.key];
+      return `
+      <div class="pairbox">
+        <div class="lbl">Predicted dynamic</div>
+        <h4>${pr.title}</h4>
+        <div class="dyad">
+          <span class="chip"><i style="background:${a.colour}"></i>You · ${a.name}</span>
+          <span class="chip"><i style="background:${b.colour}"></i>${FOUNDER.name} · ${b.name}</span>
+        </div>
+        ${dualMap()}
+      </div>
+      ${pr.dyn.map(x=>`<p>${x}</p>`).join('')}
+      <p><b>The trap.</b> ${pr.trap}</p>
+      <p><b>What actually helps.</b></p>
+      <ul class="lede-list lede-list--tight">
+        ${pr.fix.map(x=>`<li>${x}</li>`).join('')}
+      </ul>
+      <p>Worth saying clearly: this is a prediction about a <em>pattern</em>, not a verdict on a relationship. Pairings don't determine outcomes. What determines outcomes is whether two people can spot the loop while they're inside it and say so out loud. Which is a skill, and skills are trainable.</p>`;
+    }},
+
+  { kind:"the work", title:"None of this is a life sentence.",
+    build(){ return `
+      <p>The most useful finding in the whole field is that attachment style is not fixed. Longitudinal work finds meaningful movement in adults — through therapy, and through long relationships with someone whose behaviour steadily contradicts the old model. The term for arriving at security late rather than being handed it early is <b>earned security</b>, and on most measured outcomes it functions about as well as the version people get for free.</p>
+      <p>What actually shifts it, in rough order of leverage:</p>
+      <ul class="lede-list lede-list--loose">
+        <li><b>Naming the cycle in real time.</b> Not analysing it afterwards — saying it while it's happening. \u201cI'm pulling away and I don't think it's about you.\u201d That sentence does more than a year of insight, because it interrupts the loop rather than describing it.</li>
+        <li><b>Repair over prevention.</b> Every couple ruptures. What separates the durable ones is that they come back — reliably, and fairly soon. Optimising to never rupture is the wrong target and produces suppression instead.</li>
+        <li><b>Corrective repetition.</b> One reassuring experience changes nothing; the model was built by accumulation and only updates by accumulation. Reassurance failing to land the first time isn't failure, it's the process.</li>
+        <li><b>Differentiation.</b> David Schnarch's idea that the strongest intimacy is between two people who each keep a solid self while staying close — rather than two people who merge and call it love. Test: can you disagree without the relationship feeling threatened?</li>
+        <li><b>Self-soothing that isn't disappearing.</b> Regulating yourself and vanishing look identical from outside. The difference is entirely in whether you said where you were going.</li>
+      </ul>
+      <div class="pull">Compatibility is mostly luck. Capacity isn't.</div>
+      <p>That's the honest summary of a hundred years of research on this. Most advice is about finding the right person. The measurable variables are whether both people stay differentiated under stress, and whether they repair. Neither is decided by who you happened to meet.</p>`;
+    }},
+
+  { kind:"the ask", title:"The ask.",
+    build(){
+      const pr = PAIRS[pairKey(RESULT.key, FOUNDER.key)];
+      return `
+      <p>You now know his coordinate, your coordinate, the mechanism behind both, and the specific loop the two of you are most likely to fall into. That's a genuinely unusual starting position. Most people acquire this information by damaging each other for two years first.</p>
+      <p>Two requests, and then it's done.</p>
+      <p><b>One.</b> Don't use this as a label — on him or on yourself. \u201cThat's just my attachment style\u201d is the fastest way to turn a useful description into an excuse. It describes a starting point, not a ceiling.</p>
+      <p><b>Two.</b> When the loop shows up — and it will — name it out loud rather than solving the argument you're having. For the two of you specifically, the first move is: <em>${pr.fix[0].replace(/<\/?b>/g,'')}</em></p>
+      <div class="pull">He told you what he is before you asked. Least he can do is find out what you'd need.</div>
+      <p style="color:var(--muted);font-size:15px">One last thing, in case it needs saying: none of this was stored, sent, or logged to a server. It ran in your browser and it's gone when you close the tab. If you copied a shareable link, that link — and only that link — carries your answers; the only version that exists anywhere is the one you choose to send him.</p>
+      <div class="chnav" style="border:none;margin-top:8px;padding-top:0">
+        <button class="ghost" id="reReview">← Back to my result</button>
+      </div>`;
+    }}
+];
+
+function dualMap(){
+  const her = P[RESULT.key], his = P[FOUNDER.key];
+  const px = v => 26 + (v/100)*200, py = v => 10 + ((100-v)/100)*200;
+  return `<svg class="map" style="width:100%;max-width:260px;height:auto;margin:16px auto 0;display:block" viewBox="0 0 236 236">
+    <rect x="26" y="10" width="100" height="100" fill="#F2C57C" opacity=".07"/>
+    <rect x="126" y="10" width="100" height="100" fill="#5CE1E6" opacity=".07"/>
+    <rect x="26" y="110" width="100" height="100" fill="#FF6B9D" opacity=".07"/>
+    <rect x="126" y="110" width="100" height="100" fill="#A78BFA" opacity=".09"/>
+    <line x1="26" y1="110" x2="226" y2="110" stroke="#3A3154"/>
+    <line x1="126" y1="10" x2="126" y2="210" stroke="#3A3154"/>
+    <rect x="26" y="10" width="200" height="200" fill="none" stroke="#3A3154"/>
+    <text x="34" y="24" fill="#F2C57C">SECURE</text>
+    <text x="134" y="24" fill="#5CE1E6">DISMISSIVE</text>
+    <text x="34" y="203">ANXIOUS</text>
+    <text x="134" y="203" fill="#A78BFA">FEARFUL</text>
+    <text x="26" y="226">← low avoidance</text><text x="176" y="226">high →</text>
+    <line x1="${px(RESULT.avo)}" y1="${py(RESULT.anx)}" x2="${px(FOUNDER.avo)}" y2="${py(FOUNDER.anx)}"
+          stroke="#6B6288" stroke-width="1" stroke-dasharray="3 4"/>
+    <circle cx="${px(RESULT.avo)}" cy="${py(RESULT.anx)}" r="5.5" fill="${her.colour}"/>
+    <circle cx="${px(FOUNDER.avo)}" cy="${py(FOUNDER.anx)}" r="5.5" fill="${his.colour}"/>
+    <circle cx="${px(FOUNDER.avo)}" cy="${py(FOUNDER.anx)}" r="10" fill="none" stroke="${his.colour}" stroke-width=".8" opacity=".5"/>
+  </svg>`;
+}
+
+function loopSVG(){
+  return `<svg class="loop" viewBox="0 0 300 150">
+    <circle cx="70" cy="75" r="30" fill="none" stroke="#FF6B9D" stroke-width="1.2" opacity=".8"/>
+    <circle cx="230" cy="75" r="30" fill="none" stroke="#5CE1E6" stroke-width="1.2" opacity=".8"/>
+    <text x="48" y="78" fill="#FF6B9D">PURSUE</text>
+    <text x="206" y="78" fill="#5CE1E6">WITHDRAW</text>
+    <path class="flow" d="M 100 62 Q 150 32 200 62" fill="none" stroke="#FF6B9D" stroke-width="1.3" opacity=".75"/>
+    <path class="flow" d="M 200 88 Q 150 118 100 88" fill="none" stroke="#5CE1E6" stroke-width="1.3" opacity=".75"/>
+    <text x="112" y="26">presses for contact →</text>
+    <text x="120" y="140">← retreats to cope</text>
+  </svg>`;
+}
+
+let RESULT = {key:'secure', anx:0, avo:0};
+let c = 0;
+
+function chRender(){
+  const ch = CH[c];
+  el('chCount').textContent = `Chapter ${String(c+1).padStart(2,'0')} / ${String(CH.length).padStart(2,'0')}`;
+  el('chKind').textContent = ch.kind;
+  el('chNum').textContent = String(c+1).padStart(2,'0');
+  el('chTitle').textContent = ch.title;
+  el('chBody').innerHTML = ch.build();
+  el('chProg').style.width = ((c+1)/CH.length*100) + '%';
+  el('chBack').style.visibility = c === 0 ? 'hidden' : 'visible';
+  el('chNext').style.visibility = c === CH.length-1 ? 'hidden' : 'visible';
+  el('chDots').innerHTML = CH.map((_,k)=>`<i class="${k===c?'on':''}"></i>`).join('');
+  const back = el('reReview');
+  if (back) back.onclick = ()=>{ show('results'); window.scrollTo({top:0,behavior:'smooth'}); };
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+el('toJourney').onclick = ()=>{ c = 0; show('journey'); chRender(); };
+el('chNext').onclick = ()=>{ if(c < CH.length-1){ c++; chRender(); } };
+el('chBack').onclick = ()=>{ if(c > 0){ c--; chRender(); } };
+document.addEventListener('keydown', e=>{
+  if (!el('journey').classList.contains('on')) return;
+  if (e.key === 'ArrowRight' && c < CH.length-1){ c++; chRender(); }
+  if (e.key === 'ArrowLeft'  && c > 0){ c--; chRender(); }
+});
+
+/* ── a shared link renders straight to results — decode failure never
+   renders a result, it always falls back to a fresh intake ── */
+(function(){
+  if (!location.hash.startsWith('#r=')) return;
+  const dec = decodeAnswers(location.hash.slice(3));
+  if (dec.ok){
+    dec.answers.forEach((v, idx)=>{ answers[idx] = v; });
+    finish();
+  } else {
+    history.replaceState(null, '', location.pathname + location.search);
+    const msg = document.createElement('p');
+    msg.className = 'note rise d5';
+    msg.innerHTML = '<b>That link is from an older or invalid version of this test.</b> Results can’t be replayed from it safely, so nothing was guessed — retake the 18 questions below and you’ll get a fresh link to share instead.';
+    el('start').insertAdjacentElement('beforebegin', msg);
+  }
+})();
+
+/* ── self-test — only runs behind ?test=1, adds zero weight otherwise ── */
+if (new URLSearchParams(location.search).get('test') === '1'){
+  (function runSelfTest(){
+    const results = [];
+    const assert = (name, cond) => results.push({ name, pass: !!cond });
+
+    // 1. every question has exactly 4 options, each with numeric ax/av
+    Q.forEach((q, qi) => {
+      assert(`Q${qi+1} has exactly 4 options`, Array.isArray(q.o) && q.o.length === 4);
+      q.o.forEach((o, oi) => {
+        assert(`Q${qi+1} option ${oi+1} has numeric ax/av`,
+          typeof o.ax === 'number' && !Number.isNaN(o.ax) && typeof o.av === 'number' && !Number.isNaN(o.av));
+      });
+    });
+
+    // 2. tally() stays 0-100, never NaN — all-first, all-last, 200 random sets
+    const savedAnswers = answers.slice();
+    const checkTallyRange = (label, arr) => {
+      arr.forEach((v,idx)=>{ answers[idx] = v; });
+      const t = tally();
+      assert(`tally() in range: ${label} (anx)`, Number.isFinite(t.anx) && t.anx >= 0 && t.anx <= 100);
+      assert(`tally() in range: ${label} (avo)`, Number.isFinite(t.avo) && t.avo >= 0 && t.avo <= 100);
+    };
+    checkTallyRange('all-first-options', new Array(Q.length).fill(0));
+    checkTallyRange('all-last-options', new Array(Q.length).fill(3));
+    for (let trial = 0; trial < 200; trial++){
+      checkTallyRange(`random#${trial}`, Array.from({length:Q.length}, ()=> Math.floor(Math.random()*4)));
+    }
+    savedAnswers.forEach((v,idx)=>{ answers[idx] = v; });
+
+    // 3. every one of PAIRS' 10 keys is reachable from all 16 style combinations
+    const styleKeys = ['secure','anxious','dismissive','fearful'];
+    const missingPairs = [];
+    styleKeys.forEach(a => styleKeys.forEach(b => {
+      const k = pairKey(a,b);
+      if (!(k in PAIRS)) missingPairs.push(k);
+    }));
+    assert('pairKey() over all 16 style combinations resolves only to existing PAIRS entries', missingPairs.length === 0);
+
+    // 4. every CH[].build() returns a non-empty string without throwing, for all 4 RESULT.key values
+    const savedResult = RESULT;
+    styleKeys.forEach(k => {
+      RESULT = { key:k, anx:50, avo:50 };
+      CH.forEach((ch, ci) => {
+        let out, threw = false;
+        try { out = ch.build(); } catch(e){ threw = true; }
+        assert(`CH[${ci}] "${ch.kind}" builds without throwing (RESULT.key=${k})`, !threw);
+        if (!threw) assert(`CH[${ci}] "${ch.kind}" returns non-empty string (RESULT.key=${k})`, typeof out === 'string' && out.trim().length > 0);
+      });
+    });
+    RESULT = savedResult;
+
+    // 5. every profile in P has all six content fields populated
+    const contentFields = ['tag','mech','conflict','needs','manual','edge'];
+    Object.keys(P).forEach(key => {
+      contentFields.forEach(f => {
+        const val = P[key][f];
+        const populated = Array.isArray(val) ? val.length > 0 : (typeof val === 'string' && val.length > 0);
+        assert(`P.${key}.${f} is populated`, populated);
+      });
+    });
+
+    // report: console + fixed on-screen panel
+    const failed = results.filter(r => !r.pass);
+    console.log(`SELF-TEST: ${results.length - failed.length}/${results.length} passed`);
+    failed.forEach(r => console.error('FAIL:', r.name));
+
+    const panel = document.createElement('div');
+    panel.id = 'selfTestPanel';
+    panel.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:9999;max-width:340px;max-height:70vh;'
+      + 'overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;'
+      + 'padding:14px 16px;font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--text);'
+      + 'box-shadow:0 12px 30px -12px rgba(0,0,0,.6)';
+    const statusColour = failed.length ? 'var(--warm)' : 'var(--cool)';
+    panel.innerHTML = `<div style="font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:${statusColour};margin-bottom:8px">Self-test · ${results.length - failed.length}/${results.length} passed</div>`
+      + (failed.length
+          ? failed.map(f => `<div style="color:var(--warm);margin-bottom:4px">✕ ${f.name}</div>`).join('')
+          : '<div style="color:var(--muted)">All assertions passed.</div>');
+    document.body.appendChild(panel);
+  })();
+}
+</script>
+</body>
+</html>
