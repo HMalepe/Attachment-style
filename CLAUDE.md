@@ -24,8 +24,36 @@ between the two.
 ## Type system
 
 - Display: Bricolage Grotesque. Body: DM Sans. Utility/data: JetBrains Mono.
+  Editorial: Instrument Serif.
 - Mono is for instrument chrome only — counters, labels, axis names, citations.
   Never mono for prose.
+- Serif is for editorial accents only — the cover lede, the result tag, and
+  pull quotes. Never for UI, never for body copy. It carries the "this was
+  written by a person" register; the grotesque carries the instrument register.
+- Bricolage is a variable face: set `font-variation-settings:'opsz'` to match
+  the rendered size. It is narrower than the system fallback, so display
+  tracking stays near `-.02em` — tighter than that and words collide once the
+  real webfont loads.
+
+## Visual system
+
+Dark, glass, mesh. Every surface follows one material language:
+
+- **Mesh gradient ground.** `body` layers five wide radial gradients in the
+  four accent hues over `--ink`, `background-attachment:fixed`. `body::after`
+  is a slow aurora drift; `body::before` is an inline SVG grain at low opacity.
+  The grain is the "expensive" tell — do not remove it.
+- **Glass surfaces.** Cards (`.axis`, `.opt`, `.grid-card`, `.share`,
+  `.invite`, `.quad .cell`, `.pairbox`) all use `--glass` +
+  `backdrop-filter:var(--blur)` + a hairline `--glass-brd` + `--elev-*`, plus a
+  `::before` top-edge `--sheen`. Any sheen pseudo-element needs `> *
+  {position:relative}` on the parent or it paints over the content.
+- **Elevation, not outlines.** Dark UI reads as premium only when elements
+  separate by shadow and hairline highlight. Use `--elev-1/2/3`, never a flat
+  border alone.
+- **Tokens cover the new material too** — `--glass*`, `--blur*`, `--sheen`,
+  `--elev-*`, `--ring`, `--btn-top/bot`, `--ease`, `--spring`, `--grain`. The
+  no-hardcoded-hex rule still holds: add a token instead.
 
 ## Architecture
 
