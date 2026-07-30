@@ -159,6 +159,14 @@ section.blk ul{list-style:none;display:flex;flex-direction:column;gap:10px}
 section.blk li{font-size:16px;line-height:1.55;padding-left:22px;position:relative}
 section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gold)}
 
+.lede-list{list-style:none;display:flex;flex-direction:column}
+.lede-list li{font-size:16px;padding-left:22px;position:relative}
+.lede-list li::before{content:'';position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gold);display:block}
+.lede-list--tight{gap:11px;margin:6px 0 18px}
+.lede-list--tight li{line-height:1.55}
+.lede-list--loose{gap:13px;margin:18px 0}
+.lede-list--loose li{line-height:1.6}
+
 .share{border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:24px;background:var(--surface)}
 .share textarea{
   width:100%;min-height:132px;margin-top:12px;resize:vertical;
@@ -935,9 +943,8 @@ const CH = [
       ${pr.dyn.map(x=>`<p>${x}</p>`).join('')}
       <p><b>The trap.</b> ${pr.trap}</p>
       <p><b>What actually helps.</b></p>
-      <ul style="list-style:none;display:flex;flex-direction:column;gap:11px;margin:6px 0 18px">
-        ${pr.fix.map(x=>`<li style="font-size:16px;line-height:1.55;padding-left:22px;position:relative">
-          <span style="position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gold);display:block"></span>${x}</li>`).join('')}
+      <ul class="lede-list lede-list--tight">
+        ${pr.fix.map(x=>`<li>${x}</li>`).join('')}
       </ul>
       <p>Worth saying clearly: this is a prediction about a <em>pattern</em>, not a verdict on a relationship. Pairings don't determine outcomes. What determines outcomes is whether two people can spot the loop while they're inside it and say so out loud. Which is a skill, and skills are trainable.</p>`;
     }},
@@ -946,12 +953,12 @@ const CH = [
     build(){ return `
       <p>The most useful finding in the whole field is that attachment style is not fixed. Longitudinal work finds meaningful movement in adults — through therapy, and through long relationships with someone whose behaviour steadily contradicts the old model. The term for arriving at security late rather than being handed it early is <b>earned security</b>, and on most measured outcomes it functions about as well as the version people get for free.</p>
       <p>What actually shifts it, in rough order of leverage:</p>
-      <ul style="list-style:none;display:flex;flex-direction:column;gap:13px;margin:18px 0">
-        <li style="font-size:16px;line-height:1.6;padding-left:22px;position:relative"><span style="position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gold);display:block"></span><b>Naming the cycle in real time.</b> Not analysing it afterwards — saying it while it's happening. \u201cI'm pulling away and I don't think it's about you.\u201d That sentence does more than a year of insight, because it interrupts the loop rather than describing it.</li>
-        <li style="font-size:16px;line-height:1.6;padding-left:22px;position:relative"><span style="position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gold);display:block"></span><b>Repair over prevention.</b> Every couple ruptures. What separates the durable ones is that they come back — reliably, and fairly soon. Optimising to never rupture is the wrong target and produces suppression instead.</li>
-        <li style="font-size:16px;line-height:1.6;padding-left:22px;position:relative"><span style="position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gold);display:block"></span><b>Corrective repetition.</b> One reassuring experience changes nothing; the model was built by accumulation and only updates by accumulation. Reassurance failing to land the first time isn't failure, it's the process.</li>
-        <li style="font-size:16px;line-height:1.6;padding-left:22px;position:relative"><span style="position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gold);display:block"></span><b>Differentiation.</b> David Schnarch's idea that the strongest intimacy is between two people who each keep a solid self while staying close — rather than two people who merge and call it love. Test: can you disagree without the relationship feeling threatened?</li>
-        <li style="font-size:16px;line-height:1.6;padding-left:22px;position:relative"><span style="position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gold);display:block"></span><b>Self-soothing that isn't disappearing.</b> Regulating yourself and vanishing look identical from outside. The difference is entirely in whether you said where you were going.</li>
+      <ul class="lede-list lede-list--loose">
+        <li><b>Naming the cycle in real time.</b> Not analysing it afterwards — saying it while it's happening. \u201cI'm pulling away and I don't think it's about you.\u201d That sentence does more than a year of insight, because it interrupts the loop rather than describing it.</li>
+        <li><b>Repair over prevention.</b> Every couple ruptures. What separates the durable ones is that they come back — reliably, and fairly soon. Optimising to never rupture is the wrong target and produces suppression instead.</li>
+        <li><b>Corrective repetition.</b> One reassuring experience changes nothing; the model was built by accumulation and only updates by accumulation. Reassurance failing to land the first time isn't failure, it's the process.</li>
+        <li><b>Differentiation.</b> David Schnarch's idea that the strongest intimacy is between two people who each keep a solid self while staying close — rather than two people who merge and call it love. Test: can you disagree without the relationship feeling threatened?</li>
+        <li><b>Self-soothing that isn't disappearing.</b> Regulating yourself and vanishing look identical from outside. The difference is entirely in whether you said where you were going.</li>
       </ul>
       <div class="pull">Compatibility is mostly luck. Capacity isn't.</div>
       <p>That's the honest summary of a hundred years of research on this. Most advice is about finding the right person. The measurable variables are whether both people stay differentiated under stress, and whether they repair. Neither is decided by who you happened to meet.</p>`;
