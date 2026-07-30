@@ -23,37 +23,44 @@ between the two.
 
 ## Type system
 
-- Display: Bricolage Grotesque. Body: DM Sans. Utility/data: JetBrains Mono.
-  Editorial: Instrument Serif.
-- Mono is for instrument chrome only — counters, labels, axis names, citations.
-  Never mono for prose.
-- Serif is for editorial accents only — the cover lede, the result tag, and
-  pull quotes. Never for UI, never for body copy. It carries the "this was
-  written by a person" register; the grotesque carries the instrument register.
-- Bricolage is a variable face: set `font-variation-settings:'opsz'` to match
-  the rendered size. It is narrower than the system fallback, so display
-  tracking stays near `-.02em` — tighter than that and words collide once the
-  real webfont loads.
+- Display: Bricolage Grotesque. Body: DM Sans. Editorial: Instrument Serif.
+- **No monospace.** It was the single strongest "tech questionnaire" signal.
+  Chrome labels (counters, eyebrows, axis names, chip text) use `--label`
+  (DM Sans, 500, uppercase, ~.22em tracking). The `.eyebrow` class is that
+  style — it used to be `.mono`, renamed so the name stops lying.
+- Serif carries the romantic register: cover lede, result tag, pull quotes.
+  Never for UI, never for long body copy.
+- Bricolage is variable — set `font-variation-settings:'opsz'` to match the
+  rendered size. It is much narrower than the system fallback, so display
+  tracking stays near `-.02em`; tighter and words collide once the real
+  webfont loads.
 
 ## Visual system
 
-Dark, glass, mesh. Every surface follows one material language:
+Warm, soft, romantic. This is a flirty personal thing someone sends to a
+person they like — **not** a clinical instrument. If a change makes it feel
+like a SaaS onboarding flow, it is wrong.
 
-- **Mesh gradient ground.** `body` layers five wide radial gradients in the
-  four accent hues over `--ink`, `background-attachment:fixed`. `body::after`
-  is a slow aurora drift; `body::before` is an inline SVG grain at low opacity.
-  The grain is the "expensive" tell — do not remove it.
-- **Glass surfaces.** Cards (`.axis`, `.opt`, `.grid-card`, `.share`,
-  `.invite`, `.quad .cell`, `.pairbox`) all use `--glass` +
-  `backdrop-filter:var(--blur)` + a hairline `--glass-brd` + `--elev-*`, plus a
-  `::before` top-edge `--sheen`. Any sheen pseudo-element needs `> *
-  {position:relative}` on the parent or it paints over the content.
-- **Elevation, not outlines.** Dark UI reads as premium only when elements
-  separate by shadow and hairline highlight. Use `--elev-1/2/3`, never a flat
-  border alone.
-- **Tokens cover the new material too** — `--glass*`, `--blur*`, `--sheen`,
-  `--elev-*`, `--ring`, `--btn-top/bot`, `--ease`, `--spring`, `--grain`. The
-  no-hardcoded-hex rule still holds: add a token instead.
+- **Cream and nude ground.** `--ink` is the cream page ground (light), not a
+  dark colour — the name is historical. Five soft radial washes in blush,
+  peach, sage and rose sit over it, plus a slow aurora drift and a very low
+  opacity paper grain (`.05` — any higher reads as dirt on a light ground).
+- **Roses.** One inline `<g id="rose">` symbol, reused via `<use>`. The two
+  drifting blooms in `.field` are the signature: distance = avoidance,
+  thread tension = anxiety. Decorative blooms live in `.petal-field`
+  (fixed, `overflow:hidden`, `pointer-events:none`).
+  **Colour them with custom properties** (`--petal-1/2/3`) — ordinary CSS
+  selectors cannot reach inside a `<use>` shadow tree, but inherited custom
+  properties can. Selector-based fills silently render black.
+- **Soft glass on cream.** Translucent white fills, warm hairline borders,
+  generous radii, and shadows tinted warm brown — never black.
+- **Colour has two jobs, and they need different values.** The four pastel
+  accents (`--warm` rose, `--cool` sage, `--gold` honey, `--violet` plum) are
+  for **fills, dots, bars and tints only**. As small text on cream they fail
+  WCAG badly (2.1–3.4:1). For coloured **text** use the `-ink` variants
+  (`--warm-ink`, `--cool-ink`, `--gold-ink`, `--violet-ink`), which all clear
+  4.5:1. Same rule for the primary button: its rose gradient is deepened so
+  the cream label clears 4.5:1 at the lightest stop.
 
 ## Architecture
 
@@ -89,6 +96,16 @@ Direct, analytical, warm underneath. Short sentences. No therapy-speak, no
 by name where a claim comes from their work. Never overstate the science —
 this is an informal adaptation of the ECR-R, not a clinical instrument, and
 the copy says so.
+
+Two registers, and the line between them matters:
+
+- **Chrome** (counters, eyebrows, buttons, the field caption) is warm and
+  low-key — "a small invitation", "01 of 18", "settling in", "where you
+  landed", "two people, one thread". Never "intake", "calibrating",
+  "candidate", "coordinate". This copy is design; change it freely.
+- **Prose** — the 18 items, the four profiles, the ten pairings, the seven
+  chapters, and the founder note — is the author's own writing. Do not
+  rewrite it as part of a design change.
 
 ## Before you finish any task
 
