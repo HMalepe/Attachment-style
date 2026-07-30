@@ -425,6 +425,37 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
 </div>
 
 <script>
+/* ══════════════════════════════════════════════════════════
+   CONFIG — edit this block. It's you.
+   ══════════════════════════════════════════════════════════
+   Change anx/avo/key if your own result differs, and rewrite
+   the note in your own voice — it lands far harder in your
+   words than in anyone else's.
+
+   quadrantKey() is declared further down (it's hoisted, safe to
+   call here) — if key doesn't match what anx/avo implies, the
+   console will warn rather than silently rendering a wrong
+   pairing on the "you two" chapter.                            */
+const FOUNDER = {
+  name: "Holiday",
+  anx: 62,
+  avo: 76,
+  key: "fearful",
+  note: [
+    "Fearful-avoidant. High on both axes, which is the least convenient combination available.",
+    "Both my parents died in a car accident when I was twelve. My brother, my sister and I were adopted, and then moved out somewhere between eighteen and twenty. So the template isn't <b>people don't show up</b> — they did, I remember it clearly. The template is <b>this is real, and then it ends, and nobody warns you.</b>",
+    "What that built: I'm the anchor. Always. If I'm down, everyone's down — so I don't get to be down. After a long day I'd rather have a drink and arrive composed than arrive honestly tired. That isn't strength, it's a very well-engineered way of never being seen at low tide.",
+    "I'm telling you this at the front rather than letting you discover it in month eight. That's the whole point of this thing."
+  ]
+};
+
+(function validateFounder(){
+  const implied = quadrantKey(FOUNDER.anx, FOUNDER.avo);
+  if (implied !== FOUNDER.key){
+    console.warn(`FOUNDER config mismatch: key is "${FOUNDER.key}" but anx ${FOUNDER.anx} / avo ${FOUNDER.avo} implies "${implied}". Fix FOUNDER.key or the coordinate — otherwise the "you two" chapter will pair against the wrong dynamic.`);
+  }
+})();
+
 /* ══════════════════ ITEMS ══════════════════
    Each option carries a load on two axes:
    ax = attachment anxiety, av = attachment avoidance.        */
@@ -619,6 +650,14 @@ const AVO_D = [
 ];
 const band = (v,t)=> (t.find(r=>v>=r[0]&&v<r[1])||t[0])[2];
 
+/* which of the four quadrants a coordinate falls in — shared by finish()
+   and the CONFIG validation guard at the top of the file */
+function quadrantKey(anx, avo){
+  return anx >= 50
+    ? (avo >= 50 ? 'fearful'  : 'anxious')
+    : (avo >= 50 ? 'dismissive' : 'secure');
+}
+
 /* ══════════════════ STATE ══════════════════ */
 let i = 0;
 const answers = new Array(Q.length).fill(null);
@@ -740,9 +779,7 @@ function pick(k){
 /* ── results ── */
 function finish(){
   const {anx, avo} = tally();
-  const key = anx >= 50
-    ? (avo >= 50 ? 'fearful'  : 'anxious')
-    : (avo >= 50 ? 'dismissive' : 'secure');
+  const key = quadrantKey(anx, avo);
   const p = P[key];
   RESULT = {key, anx, avo};
 
@@ -838,22 +875,7 @@ paintField(0, 0, false);
 
 /* ══════════════════════════════════════════════════════════
    ACT TWO — THE JOURNEY
-   ══════════════════════════════════════════════════════════
-   ▸ EDIT THIS BLOCK. It's you. Change the numbers if your own
-     result differs, and rewrite the note in your own voice —
-     it lands far harder in your words than in anyone else's.  */
-const FOUNDER = {
-  name: "Holiday",
-  anx: 62,
-  avo: 76,
-  key: "fearful",
-  note: [
-    "Fearful-avoidant. High on both axes, which is the least convenient combination available.",
-    "Both my parents died in a car accident when I was twelve. My brother, my sister and I were adopted, and then moved out somewhere between eighteen and twenty. So the template isn't <b>people don't show up</b> — they did, I remember it clearly. The template is <b>this is real, and then it ends, and nobody warns you.</b>",
-    "What that built: I'm the anchor. Always. If I'm down, everyone's down — so I don't get to be down. After a long day I'd rather have a drink and arrive composed than arrive honestly tired. That isn't strength, it's a very well-engineered way of never being seen at low tide.",
-    "I'm telling you this at the front rather than letting you discover it in month eight. That's the whole point of this thing."
-  ]
-};
+   ══════════════════════════════════════════════════════════ */
 
 /* pairwise dynamics — keyed by the unordered pair */
 const PAIRS = {

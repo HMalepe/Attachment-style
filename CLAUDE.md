@@ -34,7 +34,16 @@ between the two.
 - `P{}` — the four style profiles. Copy lives here.
 - `PAIRS{}` — 10 pairwise dynamics, keyed by `pairKey()` (sorted, pipe-joined).
 - `CH[]` — the 7 journey chapters. Each has a `build()` returning an HTML string.
-- `FOUNDER{}` — the founder's fixed coordinate and personal note.
+- `FOUNDER{}` — the founder's fixed coordinate and personal note. Lives in the
+  CONFIG section at the very top of `<script>`, ahead of everything else —
+  that's the first thing anyone editing this file should see. Guarded by a
+  `validateFounder()` check right below it that `console.warn`s if
+  `FOUNDER.key` doesn't match the quadrant `FOUNDER.anx`/`FOUNDER.avo` imply.
+- `quadrantKey(anx, avo)` — the anx/avo → style-key quadrant logic, shared by
+  `finish()` and the CONFIG validation guard. A `function` declaration (not
+  `const`), so it's safe to call from CONFIG at the top of the file even
+  though it's defined further down — function declarations are hoisted,
+  unlike `let`/`const`.
 - `tally()` — normalises raw loads to 0–100 per axis.
 - `paintField()` — drives the signature two-orb visual.
 - `encodeAnswers()` / `decodeAnswers()` — pack/unpack the 18-answer array into
