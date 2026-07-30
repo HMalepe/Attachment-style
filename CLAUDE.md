@@ -62,6 +62,26 @@ like a SaaS onboarding flow, it is wrong.
   4.5:1. Same rule for the primary button: its rose gradient is deepened so
   the cream label clears 4.5:1 at the lightest stop.
 
+## Shape of the thing
+
+It reads like a book, not a page. Three screens: cover, questions, and the
+deck.
+
+- **The frame is pinned.** On `#quiz` and `#deck` the wrap is exactly one
+  viewport tall (`body[data-screen=...]`), the nav sits at the bottom, and
+  `#pageBody` / `#qcard` flex to fill and scroll *internally* if a page runs
+  long. Almost none do — only the four-corners grid needs a nudge, and it
+  gets a "there's a bit more" hint that appears only when a page actually
+  overflows.
+- **One idea per page.** `resultPages()` and `journeyPages()` each return
+  `{eyebrow, html, onShow?}`. Keep pages short enough to fit; if one starts
+  overflowing on a small phone, split it rather than shrinking the type.
+- **Turning a page** is `turn()` — it restarts the CSS animation by hand
+  (`animation:none` → reflow → `''`), sliding in from the direction of
+  travel. Advance with the buttons, arrow keys, space, or a swipe.
+  `overflow-x:clip` on the paged screens stops the incoming transform from
+  ever causing a horizontal pan.
+
 ## Architecture
 
 - `Q[]` — the 18 items. Each option carries `ax` (anxiety load) and
@@ -97,15 +117,20 @@ by name where a claim comes from their work. Never overstate the science —
 this is an informal adaptation of the ECR-R, not a clinical instrument, and
 the copy says so.
 
-Two registers, and the line between them matters:
+**Who is speaking.** The narrator is a woman talking to the person he's
+interested in. She refers to him in the third person ("he", and by
+`FOUNDER.name`) and to the reader as "you". Warm, funny, a bit direct — like
+a friend who happens to know the research. Light on jargon: an occasional
+"FYI" aside is right, a lecture is not. Nobody should have to go and look
+something up to follow a page.
 
-- **Chrome** (counters, eyebrows, buttons, the field caption) is warm and
-  low-key — "a small invitation", "01 of 18", "settling in", "where you
-  landed", "two people, one thread". Never "intake", "calibrating",
-  "candidate", "coordinate". This copy is design; change it freely.
-- **Prose** — the 18 items, the four profiles, the ten pairings, the seven
-  chapters, and the founder note — is the author's own writing. Do not
-  rewrite it as part of a design change.
+The one exception is `FOUNDER.note`, which stays in **his** first person. The
+narrator hands over to it explicitly ("I'll get out of the way for this bit")
+and takes the thread back afterwards. Don't rewrite that note — it's his.
+
+**Every question carries a gut-check line** (`GUT[]`, rotating). The test is
+only worth anything if she answers on instinct; the clever-sounding answer
+quietly ruins her own result. Never drop that nudge.
 
 ## Before you finish any task
 
