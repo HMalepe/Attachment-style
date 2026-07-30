@@ -1,9 +1,10 @@
 # Proximity
 
-A single-file attachment-style assessment. A candidate answers 18 items,
-gets plotted on two axes (anxiety / avoidance), then walks a 7-chapter
-journey that reveals the founder's coordinate and the predicted dynamic
-between the two.
+A single-file attachment-style assessment, written as something one person
+sends to someone they're interested in. She answers 18 questions, gets
+plotted on two axes (worry about being left / keeping yourself back), then
+turns through a short book that reveals his coordinate and what the two of
+them are likely to do to each other.
 
 ## Hard constraints — do not violate
 
@@ -88,7 +89,11 @@ deck.
   `av` (avoidance load), range -2..+2.
 - `P{}` — the four style profiles. Copy lives here.
 - `PAIRS{}` — 10 pairwise dynamics, keyed by `pairKey()` (sorted, pipe-joined).
-- `CH[]` — the 7 journey chapters. Each has a `build()` returning an HTML string.
+- `GUT[]` — the rotating gut-check line shown under every question.
+- `resultPages()` / `journeyPages()` — the book. Each returns an array of
+  `{eyebrow, html, onShow?}`; `finish()` concatenates them into `DECK` and
+  `renderPage()` shows one at a time. `onShow` exists for the couple of pages
+  that have to touch their own DOM after render (the share page).
 - `FOUNDER{}` — the founder's fixed coordinate and personal note. Lives in the
   CONFIG section at the very top of `<script>`, ahead of everything else —
   that's the first thing anyone editing this file should see. Guarded by a
@@ -100,11 +105,13 @@ deck.
   though it's defined further down — function declarations are hoisted,
   unlike `let`/`const`.
 - `tally()` — normalises raw loads to 0–100 per axis.
-- `paintField()` — drives the signature two-orb visual.
+- `paintField()` — drives the signature two-rose visual.
+- `soloMap()` / `dualMap()` / `gridBase()` — the quadrant grid. Worry grows
+  *downward* (`py`), because ANXIOUS and BOTH are the lower two corners.
 - `encodeAnswers()` / `decodeAnswers()` — pack/unpack the 18-answer array into
   a version-tagged (`HASH_VERSION`), URL-safe base64 string for the
   shareable-link feature. A version mismatch or malformed string never
-  renders a result — it always falls back to a fresh intake with a visible
+  renders a result — it always falls back to the questions with a visible
   message. The decode check runs at the very end of the script, after
   `RESULT` is declared — calling it earlier hits the `let RESULT` temporal
   dead zone.
