@@ -118,6 +118,20 @@ render; a one-time gate you see exactly once doesn't need it.
   "your two numbers" page's meters on phone-height screens. The fix is the
   blanket `#pageBody > *,#qcard > * {flex-shrink:0}` rule — keep it, and
   don't give a new top-level page element `flex-shrink` some other value.
+- **Every screen that scrolls internally resets its own scroll position on
+  render, always.** `renderPage()` (the deck) does `body.scrollTop = 0`;
+  `render()` (the questions) does `el('qcard').scrollTop = 0` for the same
+  reason. This one was missing on the questions screen for a while, and
+  the bug it caused was nasty precisely because it was invisible in the
+  obvious place to look: scroll down on any question (which she has to,
+  to reach "next"), hit next, and the *next* question inherits that same
+  scroll offset — pushing its image and question number off the top of
+  the screen, silently, for the rest of the quiz. It looked like "the
+  picture stopped showing after question 1," not "scroll state leaked
+  between renders," because nothing else about the layout was visibly
+  broken. Any future page/screen that scrolls internally needs this same
+  reset the moment its content changes — don't assume the browser clamps
+  it back to something sane on its own.
 - **One idea per page.** `resultPages()` and `journeyPages()` each return
   `{eyebrow, html, onShow?}`. Keep pages short enough to fit; if one starts
   overflowing on a small phone, split it rather than shrinking the type.
@@ -166,10 +180,19 @@ render; a one-time gate you see exactly once doesn't need it.
 - `QIMG[]` — one base64 JPEG data URI per question, index-matched to `Q[]`.
   The compressed copies live in `assets/questions/*.jpg` for reference;
   the original AI-generated source PNGs are intentionally not kept in the
-  repo (36MB for images that only ever get shrunk to ~15KB each isn't
-  worth it). See `assets/process_images.py` for how to regenerate one —
+  repo. See `assets/process_images.py` for how to regenerate one —
   `index.html` is still the one file that matters at runtime; everything
   in `assets/` is tooling, not shipped.
+  **`WIDTH=1200` / `QUALITY=78`** (bumped up from an original 640/50 that
+  looked genuinely soft on a retina phone screen — a real bug report, not
+  a nitpick). Total payload for all 18 is ~1.9MB before base64, ~2.5MB
+  after — that's most of `index.html`'s size, and a deliberate trade-off:
+  don't "optimize" it back down without checking on an actual phone
+  first, softness here reads as "cheap," which undercuts the whole point
+  of a nicely-designed personal thing. If you ever need to claw the
+  payload back down, drop `WIDTH` before you drop `QUALITY` — resolution
+  is what reads as sharp on a retina screen, quality mostly just adds
+  JPEG artifacting in flat areas.
 - `P{}` — the four style profiles. Copy lives here.
 - `PAIRS{}` — 10 pairwise dynamics, keyed by `pairKey()` (sorted, pipe-joined).
 - `GUT[]` — the rotating gut-check line shown under every question.

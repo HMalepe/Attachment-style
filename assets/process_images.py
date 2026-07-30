@@ -26,8 +26,8 @@ SRC = Path(__file__).parent / "_incoming"   # put fresh source PNGs here
 DST = Path(__file__).parent / "questions"
 DST.mkdir(exist_ok=True)
 
-WIDTH = 640
-QUALITY = 50
+WIDTH = 1200
+QUALITY = 78
 
 uris = []
 total = 0
