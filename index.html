@@ -1165,6 +1165,88 @@ document.addEventListener('keydown', e=>{
     el('start').insertAdjacentElement('beforebegin', msg);
   }
 })();
+
+/* ── self-test — only runs behind ?test=1, adds zero weight otherwise ── */
+if (new URLSearchParams(location.search).get('test') === '1'){
+  (function runSelfTest(){
+    const results = [];
+    const assert = (name, cond) => results.push({ name, pass: !!cond });
+
+    // 1. every question has exactly 4 options, each with numeric ax/av
+    Q.forEach((q, qi) => {
+      assert(`Q${qi+1} has exactly 4 options`, Array.isArray(q.o) && q.o.length === 4);
+      q.o.forEach((o, oi) => {
+        assert(`Q${qi+1} option ${oi+1} has numeric ax/av`,
+          typeof o.ax === 'number' && !Number.isNaN(o.ax) && typeof o.av === 'number' && !Number.isNaN(o.av));
+      });
+    });
+
+    // 2. tally() stays 0-100, never NaN — all-first, all-last, 200 random sets
+    const savedAnswers = answers.slice();
+    const checkTallyRange = (label, arr) => {
+      arr.forEach((v,idx)=>{ answers[idx] = v; });
+      const t = tally();
+      assert(`tally() in range: ${label} (anx)`, Number.isFinite(t.anx) && t.anx >= 0 && t.anx <= 100);
+      assert(`tally() in range: ${label} (avo)`, Number.isFinite(t.avo) && t.avo >= 0 && t.avo <= 100);
+    };
+    checkTallyRange('all-first-options', new Array(Q.length).fill(0));
+    checkTallyRange('all-last-options', new Array(Q.length).fill(3));
+    for (let trial = 0; trial < 200; trial++){
+      checkTallyRange(`random#${trial}`, Array.from({length:Q.length}, ()=> Math.floor(Math.random()*4)));
+    }
+    savedAnswers.forEach((v,idx)=>{ answers[idx] = v; });
+
+    // 3. every one of PAIRS' 10 keys is reachable from all 16 style combinations
+    const styleKeys = ['secure','anxious','dismissive','fearful'];
+    const missingPairs = [];
+    styleKeys.forEach(a => styleKeys.forEach(b => {
+      const k = pairKey(a,b);
+      if (!(k in PAIRS)) missingPairs.push(k);
+    }));
+    assert('pairKey() over all 16 style combinations resolves only to existing PAIRS entries', missingPairs.length === 0);
+
+    // 4. every CH[].build() returns a non-empty string without throwing, for all 4 RESULT.key values
+    const savedResult = RESULT;
+    styleKeys.forEach(k => {
+      RESULT = { key:k, anx:50, avo:50 };
+      CH.forEach((ch, ci) => {
+        let out, threw = false;
+        try { out = ch.build(); } catch(e){ threw = true; }
+        assert(`CH[${ci}] "${ch.kind}" builds without throwing (RESULT.key=${k})`, !threw);
+        if (!threw) assert(`CH[${ci}] "${ch.kind}" returns non-empty string (RESULT.key=${k})`, typeof out === 'string' && out.trim().length > 0);
+      });
+    });
+    RESULT = savedResult;
+
+    // 5. every profile in P has all six content fields populated
+    const contentFields = ['tag','mech','conflict','needs','manual','edge'];
+    Object.keys(P).forEach(key => {
+      contentFields.forEach(f => {
+        const val = P[key][f];
+        const populated = Array.isArray(val) ? val.length > 0 : (typeof val === 'string' && val.length > 0);
+        assert(`P.${key}.${f} is populated`, populated);
+      });
+    });
+
+    // report: console + fixed on-screen panel
+    const failed = results.filter(r => !r.pass);
+    console.log(`SELF-TEST: ${results.length - failed.length}/${results.length} passed`);
+    failed.forEach(r => console.error('FAIL:', r.name));
+
+    const panel = document.createElement('div');
+    panel.id = 'selfTestPanel';
+    panel.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:9999;max-width:340px;max-height:70vh;'
+      + 'overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;'
+      + 'padding:14px 16px;font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--text);'
+      + 'box-shadow:0 12px 30px -12px rgba(0,0,0,.6)';
+    const statusColour = failed.length ? 'var(--warm)' : 'var(--cool)';
+    panel.innerHTML = `<div style="font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:${statusColour};margin-bottom:8px">Self-test · ${results.length - failed.length}/${results.length} passed</div>`
+      + (failed.length
+          ? failed.map(f => `<div style="color:var(--warm);margin-bottom:4px">✕ ${f.name}</div>`).join('')
+          : '<div style="color:var(--muted)">All assertions passed.</div>');
+    document.body.appendChild(panel);
+  })();
+}
 </script>
 </body>
 </html>
