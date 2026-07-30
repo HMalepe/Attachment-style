@@ -114,6 +114,38 @@ render; a one-time gate you see exactly once doesn't need it.
   travel. Advance with the buttons, arrow keys, space, or a swipe.
   `overflow-x:clip` on the paged screens stops the incoming transform from
   ever causing a horizontal pan.
+- **Mobile is the primary target, so animations are compositor-only.**
+  Every progress/meter bar (`.bar span`, `.track span`) animates
+  `transform:scaleX()` off a fixed `width:100%`, not `width` itself —
+  keep it that way, animating `width` forces a layout recalc every frame.
+  Same reasoning for the "YOU" ping ring on the map: it scales via
+  `transform` (`transform-box:fill-box` so it scales around the dot, not
+  the SVG viewport) instead of animating the SVG `r` attribute. The
+  handful of animations that run for the entire session — the aurora
+  drift, the two field roses, the thread hum, the per-question Ken Burns
+  image — carry `will-change:transform` so they're promoted to their own
+  layer immediately instead of the browser discovering that mid-scroll.
+  Don't add `will-change` to one-off hover/press effects; that just wastes
+  memory for something that's idle 99% of the time.
+- `background-attachment:fixed` was deliberately removed from `body`. It
+  looks identical (the mesh is a full-bleed wash, not a parallax effect)
+  but forces a full repaint of the background on every scroll frame —
+  one of the most common mobile-Safari jank triggers. Don't put it back.
+- `--blur` / `--blur-lg` (the backdrop-filter tokens behind every glass
+  card) get a cheaper value under `@media (pointer:coarse), (max-width:640px)`.
+  Backdrop-filter is the single most expensive thing on this page —
+  trimming the radius on touch/small viewports keeps the "soft glass"
+  look while meaningfully cutting the GPU cost on the phones this is
+  actually read on. If you add a new glass surface, use `var(--blur)`/
+  `var(--blur-lg)` like the rest, never a hardcoded blur value, so it
+  inherits this discount automatically.
+- Buttons get `:active` states mirroring their `:hover` ones (`.cta`,
+  `.nx`, `.opt`, `.ghost`, the copy button). Touch devices don't reliably
+  fire `:hover`, so without this every tap feels unresponsive until
+  release. Add both together for any new interactive element.
+- `.wrap` padding includes `env(safe-area-inset-*)` and the viewport tag
+  has `viewport-fit=cover`, so content and the pinned bottom nav clear
+  the notch/home-indicator on edge-to-edge phones.
 
 ## Architecture
 
