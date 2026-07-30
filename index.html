@@ -362,7 +362,10 @@ h1 em{
 .other-box::placeholder{color:var(--muted-2)}
 
 .qfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;padding-top:4px}
+.qfoot-right{display:flex;align-items:center;gap:14px}
 .hint{font-family:var(--label);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2);text-align:right}
+#qNext{padding:13px 22px}
+#qNext:disabled{opacity:.35;pointer-events:none;box-shadow:none;transform:none}
 
 /* ---------- results ---------- */
 .verdict-k{font-family:var(--label);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
@@ -781,7 +784,10 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
       </div>
       <div class="qfoot">
         <button class="ghost" id="back">← back</button>
-        <div class="hint" id="hint">keys 1–4 · pick up to 2</div>
+        <div class="qfoot-right">
+          <div class="hint" id="hint">keys 1–4 · pick up to 2 · enter ↵</div>
+          <button class="nx" id="qNext" disabled>next <span class="arw">→</span></button>
+        </div>
       </div>
     </div>
   </div>
@@ -1519,7 +1525,6 @@ let page = 0;
 let SUMMARY = '', SHARE_URL = '';
 const answers = Q.map(()=>[]);   // each entry: 1 or 2 selected option indices, empty = unanswered
 const OTHER = Q.map(()=>'');     // optional free-text "in your own words", per question
-let advanceTimer = null;
 
 const el = id => document.getElementById(id);
 const show = id => {
@@ -1693,6 +1698,7 @@ function render(){
 
   renderOptions();
   renderOther();
+  updateNextBtn();
 
   turn(el('qcard'), 1);
   const t = tally();
@@ -1723,8 +1729,11 @@ function renderOther(){
 }
 
 /* picking is a toggle, not a radio — up to 2 selections, "in case they
-   can't decide". Advancing is debounced rather than instant, so there's
-   a beat to add a second pick before the page turns. */
+   can't decide". Nothing auto-advances: she picks in her own time and
+   moves on herself, with "next" (or the enter key, or tapping an option
+   then next), same as every other page in this app. It used to advance
+   on a timer after a pick and that was a mistake — it fired mid-decision,
+   before a second pick could land. Don't bring that back. */
 function toggleOpt(k){
   const sel = answers[i];
   const pos = sel.indexOf(k);
@@ -1737,18 +1746,14 @@ function toggleOpt(k){
   renderOptions();
   const t = tally();
   paintField(t.anx, t.avo, false);
-  scheduleAdvance();
+  updateNextBtn();
 }
 
-function scheduleAdvance(){
-  clearTimeout(advanceTimer);
-  if (!answers[i].length) return;
-  const wait = answers[i].length >= 2 ? 260 : 620;  // two picks = decided, go sooner
-  advanceTimer = setTimeout(advance, wait);
+function updateNextBtn(){
+  el('qNext').disabled = !answers[i].length;
 }
 
 function advance(){
-  clearTimeout(advanceTimer);
   if (!answers[i].length) return;
   if (i < Q.length - 1){ i++; render(); }
   else finish();
@@ -1888,6 +1893,7 @@ function go(d){
 /* ── wiring ── */
 el('start').onclick = ()=>{ show('quiz'); render(); window.scrollTo({top:0}); };
 el('back').onclick  = ()=>{ if(i>0){ i--; render(); } };
+el('qNext').onclick = advance;
 el('deckNext').onclick = ()=> go(1);
 el('deckBack').onclick = ()=> go(-1);
 el('again').onclick = ()=>{
@@ -2020,6 +2026,25 @@ if (new URLSearchParams(location.search).get('test') === '1'){
     })();
     assert('QIMG has exactly one image per question', Array.isArray(QIMG) && QIMG.length === Q.length);
     QIMG.forEach((u,qi)=> assert(`QIMG[${qi}] looks like a data URI`, typeof u === 'string' && u.startsWith('data:image/')));
+
+    // picking never auto-advances — see CLAUDE.md, this used to be a timer
+    // and it was a bug, not a feature
+    (function(){
+      const savedAnswer = answers[i].slice(), savedI = i;
+      answers[i] = [];
+      updateNextBtn();
+      assert('next button starts disabled with no pick', el('qNext').disabled === true);
+      toggleOpt(0);
+      assert('next button enables after one pick', el('qNext').disabled === false);
+      assert('picking a single option never advances the question on its own', i === savedI);
+      toggleOpt(1);
+      assert('next button stays enabled with a second pick', el('qNext').disabled === false);
+      assert('picking a second option never advances the question on its own', i === savedI);
+      toggleOpt(0); toggleOpt(1);
+      assert('next button disables again once every pick is removed', el('qNext').disabled === true);
+      answers[i] = savedAnswer;
+      updateNextBtn();
+    })();
 
     const saved = answers.map(a => a.slice());
     const range = (label, arr) => {

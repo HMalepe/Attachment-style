@@ -205,9 +205,14 @@ render; a one-time gate you see exactly once doesn't need it.
   unlike `let`/`const`.
 - `answers[]` — one entry per question, each an array of 1–2 selected option
   indices (empty until answered). `toggleOpt()` adds/removes a pick, keeping
-  at most the two most recent; `scheduleAdvance()` debounces the page turn
-  (620ms for one pick, 260ms once a second lands) so there's room to change
-  your mind before it moves on.
+  at most the two most recent. **Advancing is manual, never automatic** —
+  `#qNext` (`updateNextBtn()` enables it once `answers[i].length`) is the
+  only trigger besides Enter. There used to be a timer that auto-advanced
+  after a pick; it got removed because it fired mid-decision, before a
+  second pick could land, and on a touch device (no Enter key, and `.hint`
+  is hidden under `pointer:coarse`) it was the *only* way to move forward —
+  meaning there was no way to slow it down. Don't reintroduce any
+  auto-advance on the question screen for any reason.
 - `tally()` — normalises raw loads to 0–100 per axis. When a question has two
   picks, it **averages** their ax/av rather than summing, so an "in between"
   answer lands between the two options instead of double-weighting that
