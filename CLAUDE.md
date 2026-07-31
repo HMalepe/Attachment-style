@@ -215,7 +215,16 @@ render; a one-time gate you see exactly once doesn't need it.
   that's the first thing anyone editing this file should see. Guarded by a
   `validateFounder()` check right below it that `console.warn`s if
   `FOUNDER.key` doesn't match the quadrant `FOUNDER.anx`/`FOUNDER.avo` imply.
-- `GUEST{name}` — just the gate's greeting ("Hi, Bree?"). The actual code
+- `GUEST{name}` — just the gate's greeting ("Hi, Bree…"). The trailing
+  ellipsis lives in its own `<span class="gate-ellipsis">`, outside the
+  `<em id="gateName">` — `el('gateName').textContent = GUEST.name` wipes
+  whatever's inside the `<em>` on load, so anything meant to survive
+  that (the ellipsis, its color) has to sit next to it, not inside it.
+  `.gate-dots` (three small pulsing dots, top-left of the gate card) is
+  purely decorative — lifted from a design reference, nothing is
+  actually loading — and gets killed along with every other animation
+  by the site-wide `prefers-reduced-motion` block, same as everything
+  else. The actual code
   and the kill switch both live server-side now, in `api/gate.js`, driven
   entirely by the `GATE_CODE` / `GATE_ACTIVE` environment variables. This
   used to be `GUEST{name, code, active}` with the code hardcoded here and

@@ -227,6 +227,30 @@ h1 em{
 .ghost:hover,.ghost:active{color:var(--text)}
 
 /* ---------- the gate ---------- */
+/* a purely decorative "thinking" indicator, top-left of the gate card —
+   nothing is actually loading, it's just the lovey-dovey ambient motion
+   from the reference mock. Reduced-motion strips the animation globally
+   (see the media block below), leaving three small static dots. */
+.gate-dots{display:flex;gap:6px;margin-bottom:16px}
+.gate-dots span{
+  width:5px;height:5px;border-radius:50%;background:var(--warm);
+  animation:gateDotPulse 1.4s ease-in-out infinite;
+}
+.gate-dots span:nth-child(2){animation-delay:.18s}
+.gate-dots span:nth-child(3){animation-delay:.36s}
+@keyframes gateDotPulse{
+  0%,80%,100%{opacity:.22;transform:scale(.75)}
+  40%{opacity:1;transform:scale(1)}
+}
+/* the reference mock's "Bree." is a flat coral, not the warm→violet
+   gradient the rest of the site's h1 em uses — scoped to the gate only
+   so nothing else on the page changes. The trailing ellipsis rides the
+   same color, kept outside the <em> since gateName's textContent gets
+   overwritten by GUEST.name on load (see enterApp() in the script). */
+#gate h1 em{
+  background:none;-webkit-background-clip:unset;background-clip:unset;color:var(--warm-ink);
+}
+#gate h1 .gate-ellipsis{color:var(--warm-ink)}
 .gate-form{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:22px}
 .code-input{
   flex:1 1 200px;min-width:0;
@@ -757,9 +781,10 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
 
   <!-- ══════════ GATE ══════════ -->
   <div class="screen on" id="gate">
+    <div class="gate-dots" aria-hidden="true"><span></span><span></span><span></span></div>
     <div class="eyebrow rise d1">before we start</div>
-    <h1 class="rise d2">Hi, <em id="gateName">Bree</em>?</h1>
-    <p class="lede rise d3">Good to meet you. This one's just for you.</p>
+    <h1 class="rise d2">Hi, <em id="gateName">Bree</em><span class="gate-ellipsis">…</span></h1>
+    <p class="lede rise d3">You know the code, now type it in.</p>
     <p class="note rise d4">He gave you a code. Type it in and we'll get going.</p>
 
     <form class="gate-form rise d4" id="gateForm" autocomplete="off">
