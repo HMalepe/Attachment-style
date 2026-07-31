@@ -407,16 +407,60 @@ by name where a claim comes from their work. Never overstate the science —
 this is an informal adaptation of the ECR-R, not a clinical instrument, and
 the copy says so.
 
-**Who is speaking.** The narrator is a woman talking to the person he's
-interested in. She refers to him in the third person ("he", and by
-`FOUNDER.name`) and to the reader as "you". Warm, funny, a bit direct — like
-a friend who happens to know the research. Light on jargon: an occasional
-"FYI" aside is right, a lecture is not. Nobody should have to go and look
-something up to follow a page.
+**Who is speaking.** The narrator is a woman talking to the person she's
+interested in. She calls him **`FOUNDER.name`** ("Holiday"), not "he" — a
+full copy audit replaced the generic third-person pronoun with his actual
+name everywhere the narrator is unambiguously talking about him (cover,
+gate, the closing chapters, the pairing pages, "dating you in three lines").
+That was a deliberate fix: leaning on "he" throughout read like a template
+anyone could send, which was most of what made the copy feel synthetic in
+the first place — using his name is what makes it read like it's actually
+from him. Natural follow-on pronouns within the same sentence/paragraph
+after he's already been named are fine and expected ("Holiday will reach
+and then flinch... his ability to..." reads as normal English, not a
+regression) — the rule is *name him once per passage*, not *never use "he"
+again*. Referring to the reader as "you" is unchanged.
 
-The one exception is `FOUNDER.note`, which stays in **his** first person. The
-narrator hands over to it explicitly ("I'll get out of the way for this bit")
-and takes the thread back afterwards. Don't rewrite that note — it's his.
+**Where "he" legitimately stays generic.** `Q[]` (the 18 quiz questions)
+and each style's `.mech`/`.conflict`/`.edge` copy in `P{}` describe her own
+attachment *pattern* — a trait that predates and outlasts any one partner —
+using "he"/"a partner" as a hypothetical stand-in, the same way a
+psychology questionnaire would. Renaming that generic partner to "Holiday"
+would imply an established relationship history that may not exist yet and
+would quietly change what the quiz is actually measuring. Historical
+references (Bowlby, Ainsworth's "his colleague") and the abstract "reaches
+→ backs off" loop diagram (`loopSVG()`, generic "him"/"her" labels, used in
+the *educational* "the loop" chapter, not the personal "you two" chapter)
+are illustrative, not about him, and stay generic too.
+
+**`PAIRS{}` is keyed by `pairKey()` — sorted alphabetically, not "her key
+first."** Only 4 of the 10 entries ever render for this deployment, because
+`FOUNDER.key` is fixed at `"fearful"`: whichever of her four possible keys
+gets combined with his. This bit someone once, for real: `"fearful|secure"`
+was written assuming "the first key alphabetically is always 'you'" — true
+for `anxious|fearful` and `dismissive|fearful` (her key sorts first), false
+for `fearful|secure` (his key sorts first, because f < s), so the copy had
+the pronouns backwards — attributing the reach-and-flinch behaviour to "you"
+and the steady behaviour to "him," when a secure result means the opposite
+is true. Fixed by hand for `fearful|secure`; if `FOUNDER.key` ever changes,
+re-check whichever of the 10 entries newly comes into play the same way —
+don't assume alphabetical order lines up with "her vs. him" without
+checking which key actually belongs to `FOUNDER`.
+
+**Trade-off worth knowing about:** hardcoding "Holiday" into `PAIRS{}`,
+`resultPages()` and `journeyPages()` (rather than threading `FOUNDER.name`
+through as a template variable) means the old "hand this to the next
+person: change `GUEST.name`, change `GATE_CODE`, redeploy" migration path
+(see the `GUEST` config comment) no longer fully holds — reusing this for
+a different founder would now also need a find-and-replace pass on
+"Holiday" in those three places. Named here on purpose so nobody's
+surprised by it later.
+
+The one exception to all of the above is `FOUNDER.note`, which stays in
+**his** first person throughout — it's already unambiguously him, by
+construction, so there's nothing to rename. The narrator hands over to it
+explicitly ("I'll get out of the way for this bit") and takes the thread
+back afterwards. Don't rewrite that note — it's his.
 
 **Every question carries a gut-check line** (`GUT[]`, rotating). The test is
 only worth anything if she answers on instinct; the clever-sounding answer
