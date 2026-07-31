@@ -268,6 +268,15 @@ render; a one-time gate you see exactly once doesn't need it.
   results deck's "in your own words" page, but deliberately **not** part of
   the share-link payload (see `encodeAnswers`). Always pass it through
   `escapeHtml()` before dropping it into `innerHTML` — it's user input.
+  `#otherToggle` (the "OTHER — say it in your own words" card) is styled
+  to look like a real, tappable thing rather than an 11px grey link — it
+  used to be nearly invisible, that was a real complaint. **If you give
+  `.other-toggle` its own `display` again, keep the paired
+  `.other-toggle[hidden]{display:none}` rule too** — an author stylesheet's
+  `display` always beats the browser's built-in `[hidden]{display:none}`
+  regardless of selector specificity, so without that override, toggling
+  the `hidden` attribute in `renderOther()` silently stops hiding the
+  button at all (it did, briefly, while building this).
 - `paintField()` — drives the signature two-rose visual.
 - `soloMap()` / `dualMap()` / `gridBase()` — the quadrant grid. Worry grows
   *downward* (`py`), because ANXIOUS and BOTH are the lower two corners.

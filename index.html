@@ -354,22 +354,44 @@ h1 em{
 }
 .opt.picked .key{background:var(--gold-ink);border-color:transparent;color:var(--ink)}
 
-/* ---------- "or, in your own words" ---------- */
+/* ---------- "or, in your own words" ----------
+   This used to be an 11px grey link, easy to miss entirely against the
+   cream background — real feedback: "I could barely see it." It's now
+   styled to look like a real, tappable card, just visually distinct
+   from the 4 options (dashed border, no number chip) so it reads as an
+   escape hatch from them, not a 5th thing to pick. */
 .other-wrap{margin-top:14px}
 .other-toggle{
-  font-family:var(--label);font-size:11px;letter-spacing:.1em;
-  color:var(--muted);transition:color .2s
+  display:flex;align-items:center;gap:12px;width:100%;
+  padding:16px 20px;border-radius:18px;text-align:left;
+  border:1.5px dashed var(--glass-brd-hi);background:var(--surface-hi);
+  transition:border-color .2s, background .2s, transform .15s;
 }
-.other-toggle:hover,.other-toggle:active{color:var(--warm-ink)}
+/* author `display` always beats the UA [hidden]{display:none} default
+   regardless of specificity, so this needs to be explicit or toggling
+   the `hidden` attribute silently stops hiding the button at all */
+.other-toggle[hidden]{display:none}
+.other-toggle:hover{border-color:var(--warm-ink);background:var(--glass)}
+.other-toggle:active{transform:scale(.99)}
+.other-toggle .plus{
+  flex:none;width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:700;color:var(--warm-ink);
+  background:var(--blush);
+}
+.other-toggle .txt{display:flex;flex-direction:column;gap:2px}
+.other-toggle .txt b{font-family:var(--serif);font-size:14.5px;color:var(--text);font-weight:600}
+.other-toggle .txt span{font-family:var(--label);font-size:10.5px;letter-spacing:.08em;color:var(--muted)}
 .other-box{
-  width:100%;min-height:74px;margin-top:2px;resize:vertical;
+  width:100%;min-height:84px;resize:vertical;
   background:var(--glass);color:var(--text);
   -webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
-  border:1px solid var(--glass-brd);border-radius:16px;
-  padding:14px 16px;font-family:var(--body);font-size:14px;line-height:1.55;
+  border:1.5px solid var(--glass-brd-hi);border-radius:18px;
+  padding:16px 18px;font-family:var(--body);font-size:15px;line-height:1.55;
   box-shadow:var(--elev-1), var(--ring);
 }
 .other-box::placeholder{color:var(--muted-2)}
+.other-box:focus{outline:none;border-color:var(--warm-ink)}
 
 .qfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;padding-top:4px}
 .qfoot-right{display:flex;align-items:center;gap:14px}
@@ -789,8 +811,14 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
       <p class="gut" id="gut"></p>
       <div class="opts" id="opts"></div>
       <div class="other-wrap" id="otherWrap">
-        <button class="other-toggle" id="otherToggle" type="button">+ or, in your own words</button>
-        <textarea class="other-box" id="otherBox" hidden maxlength="400" placeholder="Anything the options above didn't quite capture…"></textarea>
+        <button class="other-toggle" id="otherToggle" type="button">
+          <span class="plus" aria-hidden="true">+</span>
+          <span class="txt">
+            <b>None of these quite it?</b>
+            <span>OTHER — say it in your own words</span>
+          </span>
+        </button>
+        <textarea class="other-box" id="otherBox" hidden maxlength="400" placeholder="What actually happens, if it's not up there…"></textarea>
       </div>
       <div class="qfoot">
         <button class="ghost" id="back">← back</button>
