@@ -297,24 +297,37 @@ render; a one-time gate you see exactly once doesn't need it.
   `requestReflection(extras)` (fire-and-forget, right when the deck
   starts, not when she reaches the page — by the time she's clicked
   through a few results pages the response is usually already back). It
-  POSTs `buildReflectionPayload(extras)` — `{code, notes}`, where `code`
-  is `ENTERED_CODE` (whatever she actually typed and had accepted at the
-  gate, kept in a plain in-memory variable, never stored) and `notes` is
-  her question/answer pairs — to `/api/reflect`. `reflectionState`
-  (`idle`/`pending`/`done`/`failed`) and `reflectionText` are the only
-  state; `showReflection()` is the `onShow` for the "in your own words"
-  page and just paints whatever the current state is, so it's safe to
-  call every time that page is (re)shown, including before the fetch has
-  settled. On failure (bad key, offline, rate-limited, anything) it shows
-  a plain "couldn't reach Claude" message with a WhatsApp link to
-  `HOLIDAY_WHATSAPP` — never a broken page, never a silent retry loop.
-  `buildReflectionPayload` is deliberately a pure function separate from
+  POSTs `buildReflectionPayload(extras)` — `{code, result, answers,
+  notes}` — to `/api/reflect`. `code` is `ENTERED_CODE` (whatever she
+  actually typed and had accepted at the gate, kept in a plain in-memory
+  variable, never stored). `result` is her computed `{name, tag, anx,
+  avo}` from `tally()`/`P[key]`. `answers` is all 18 questions with the
+  label(s) she picked, from the global `answers[]`/`Q[]`. `notes` is her
+  free-text question/answer pairs. The point of sending the full answer
+  set and the calculated result (not just the isolated notes) is so the
+  reflection can actually reason about how her own words relate to her
+  real result, instead of commenting on a note with no context for what
+  it means. This still only fires when `extras.length` — i.e. she wrote
+  at least one note — so sending more context doesn't change *when* the
+  call happens, only what Claude has to work with once it does.
+  `reflectionState` (`idle`/`pending`/`done`/`failed`) and
+  `reflectionText` are the only state; `showReflection()` is the
+  `onShow` for the "in your own words" page and just paints whatever the
+  current state is, so it's safe to call every time that page is
+  (re)shown, including before the fetch has settled. On failure (bad
+  key, offline, rate-limited, anything) it shows a plain "couldn't reach
+  Claude" message with a WhatsApp link to `HOLIDAY_WHATSAPP` — never a
+  broken page, never a silent retry loop. `buildReflectionPayload` is
+  deliberately a pure function (calls `tally()`/`quadrantKey()` fresh
+  each time rather than trusting a stale `RESULT` global) separate from
   the `fetch()` call so the self-test can check its shape without
   touching the network. See `api/reflect.js` for the server side: it
   re-checks `code` against the same `GATE_CODE` env var `api/gate.js`
   uses (nothing to keep in sync anymore — same variable, same source of
-  truth), caps note count/length, and never persists anything — that
-  function is stateless by design, don't add a database behind it.
+  truth), caps note/answer count and length, treats `result`/`answers`
+  as optional/best-effort (an older client just means Claude reasons
+  from notes alone), and never persists anything — that function is
+  stateless by design, don't add a database behind it.
 - **The PDF export** — `downloadPdf()` (wired to the "download the pdf"
   button on the "yours to keep" page, inside `fillShare()`) builds one
   plain HTML document out of the current `DECK` via `buildPrintHtml()` /

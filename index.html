@@ -791,7 +791,7 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
 
     <p class="note rise d4">That’s the whole model. Everything else about how a person loves tends to follow from those two.</p>
     <p class="note rise d5"><b>Answer fast and answer honestly.</b> Not how you’d like to be, not how it sounds best — how you actually are. The clever-sounding answer is the one that ruins your own result, and you’re the only person who loses.</p>
-    <p class="note rise d5"><b>Your answers stay on your phone.</b> All eighteen questions run right here — nothing saved, nothing sent, gone when you close the tab. The one exception: if you type something in the optional "your own words" box, that text gets sent once, at the end, to Claude, to write you a short reflection on it — then it's discarded. Skip that box and nothing ever leaves your phone at all.</p>
+    <p class="note rise d5"><b>Your answers stay on your phone.</b> All eighteen questions run right here — nothing saved, nothing sent, gone when you close the tab. The one exception: if you type something in the optional "your own words" box, everything gets sent once, at the end, to Claude — your notes, your answer picks, and your result — so it can write you a reflection that actually engages with what you got, not just the notes on their own. Then it's discarded. Skip that box and nothing ever leaves your phone at all.</p>
 
     <button class="cta rise d5" id="start">let’s go <span class="arw">→</span></button>
   </div>
@@ -906,10 +906,12 @@ const GUEST = {
    REFLECT — the one thing on this page that touches a network.
    ══════════════════════════════════════════════════════════
    Everything else in this app runs entirely on-device. The single
-   exception: if she uses the optional "in your own words" box, that
-   text is sent once, at the end, to /api/reflect (a tiny serverless
+   exception: if she uses the optional "in your own words" box, her
+   notes — plus her full set of picks and the result calculated from
+   them — are sent once, at the end, to /api/reflect (a tiny serverless
    function — see api/reflect.js) which asks Claude for a short
-   reflection on it.    Nothing is stored anywhere, on either end — the
+   reflection that actually engages with her real result, not just the
+   notes in isolation. Nothing is stored anywhere, on either end — the
    request happens, the response gets shown once, that's the whole
    lifecycle. If she never touches the free-text box, this never fires
    and nothing ever leaves her phone, same as before.
@@ -1302,9 +1304,29 @@ let reflectionState = 'idle';   // idle | pending | done | failed
 let reflectionText = '';
 let reflectionPromise = null;
 
+/* Sending only her free-text notes meant Claude was reasoning in a
+   vacuum — it never knew her actual numbers, her quadrant, or what she
+   picked on the 17 questions she *didn't* write a note under. So when
+   she used the OTHER box specifically because none of the 4 options
+   fit, the reflection couldn't say anything about *why* that mattered
+   to her actual result — it could only riff on the note in isolation.
+   Now the payload carries her whole answer set + the computed result,
+   so the reflection can genuinely engage with both at once: "the quiz
+   called you X, and what you wrote here is exactly the kind of thing
+   that number doesn't capture." Still only sent when she's written at
+   least one note (see finish()) — this doesn't change when the network
+   call fires, only how much it's given to work with once it does. */
 function buildReflectionPayload(extras){
+  const t = tally();
+  const key = quadrantKey(t.anx, t.avo);
+  const p = P[key];
   return {
     code: ENTERED_CODE,
+    result: { name: p.name, tag: p.tag, anx: t.anx, avo: t.avo },
+    answers: Q.map((q, qi) => ({
+      q: q.t,
+      picked: answers[qi].map(k => q.o[k].l)
+    })),
     notes: extras.map(x => ({ q: x.q, a: x.a }))
   };
 }
@@ -1584,7 +1606,7 @@ function journeyPages(){
     { eyebrow:"the ask", html:`
       <div class="pull">He told you what he is before you asked. Least he can do is find out what you'd need.</div>
       <p>That's everything. You now know his coordinate, yours, where both came from, and the exact loop you're most likely to fall into — which is a genuinely unusual place to start. Most people get this information by hurting each other for two years first.</p>
-      <p class="small" style="margin-top:18px">And one last time, because it matters: none of this was stored or logged anywhere. Your eighteen answers ran entirely on your phone. The only thing that ever left it was your own free-text notes, if you wrote any — sent once to get that reflection, then discarded, nowhere else. The only copy of any of this that exists is the one you choose to send.</p>
+      <p class="small" style="margin-top:18px">And one last time, because it matters: none of this was stored or logged anywhere. Your eighteen answers ran entirely on your phone. The only thing that ever left it, if you wrote in the free-text box, was that note along with your picks and your result — sent once to get a reflection that actually spoke to what you got, then discarded, nowhere else. The only copy of any of this that exists is the one you choose to send.</p>
       <div class="chnav" style="border:none;margin-top:20px;padding-top:0">
         <button class="ghost" id="reReview">← back to my result</button>
       </div>` }
@@ -2259,6 +2281,10 @@ if (new URLSearchParams(location.search).get('test') === '1'){
       ENTERED_CODE = savedCode;
       assert('reflection payload has one note per extra', Array.isArray(payload.notes) && payload.notes.length === 2);
       assert('reflection payload notes keep q/a only', payload.notes[0].q === 'Q one' && payload.notes[0].a === 'note one');
+      assert('reflection payload carries her computed result', payload.result && typeof payload.result.name === 'string'
+        && Number.isFinite(payload.result.anx) && Number.isFinite(payload.result.avo));
+      assert('reflection payload carries one answer entry per question', Array.isArray(payload.answers) && payload.answers.length === Q.length);
+      assert('reflection payload answer entries carry q + picked labels', payload.answers[0].q === Q[0].t && Array.isArray(payload.answers[0].picked));
       assert('reflection payload is JSON-serialisable', typeof JSON.stringify(payload) === 'string');
     })();
 

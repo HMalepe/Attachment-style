@@ -54,13 +54,16 @@ breaks, she just doesn't get a reflection.
 ## The reflection feature
 
 If she writes something in the optional free-text box under a question,
-that text (and only that text, only if she uses the box) gets sent once,
-when she finishes the quiz, to `/api/reflect`, which asks Claude Haiku for
-a short reflection and returns it. Nothing is stored anywhere on either
-end — it's a single stateless request/response, not a database. The
-on-screen copy (cover screen, closing page) says exactly this; if you
-change the behavior, update that copy too so it stays accurate. Full
-details in `CLAUDE.md`.
+that (and only that, only if she uses the box) triggers one request, when
+she finishes the quiz, to `/api/reflect`. The payload isn't just the note
+— it's her full set of picks across all 18 questions plus the result
+calculated from them (name + the two numbers), so Claude Haiku can write
+a reflection that actually engages with her real result instead of
+commenting on an isolated note with no context. Nothing is stored
+anywhere on either end — it's a single stateless request/response, not a
+database. The on-screen copy (cover screen, closing page) says exactly
+this; if you change the behavior, update that copy too so it stays
+accurate. Full details in `CLAUDE.md`.
 
 ## The PDF export
 
