@@ -8,33 +8,40 @@ them are likely to do to each other.
 
 ## Hard constraints — do not violate
 
-- **Single file, plus exactly one narrow exception.** Everything user-facing
-  ships in one `index.html`. No build step, no bundler, no npm dependencies,
-  no framework. The one deliberate exception is `api/reflect.js`, a tiny
-  dependency-free Vercel serverless function whose only job is to hold the
-  Anthropic API key server-side — see "The one network call" below for why
-  it exists and exactly what it's allowed to do. Nothing else gets a
-  backend. If some other change needs a build step, propose it and stop —
-  don't implement it.
-- **No network calls at runtime, except one, and it's an opt-in.** No
+- **Single file, plus exactly two narrow exceptions.** Everything
+  user-facing ships in one `index.html`. No build step, no bundler, no npm
+  dependencies, no framework. The two deliberate exceptions are tiny
+  dependency-free Vercel serverless functions in `api/`:
+    - `api/gate.js` — checks the code she types in against the `GATE_CODE`
+      env var, so the password lives in exactly one place (Vercel), not
+      hardcoded in this file. See the `GUEST` bullet further down for why.
+    - `api/reflect.js` — holds the Anthropic API key server-side. See
+      "The reflection feature" below for why it exists and exactly what
+      it's allowed to do.
+  Nothing else gets a backend. If some other change needs a build step,
+  propose it and stop — don't implement it.
+- **No network calls at runtime, except two, and only one is opt-in.** No
   analytics, no telemetry, no fonts beyond the existing Google Fonts
   `@import`, no CDN scripts. The privacy claim in the copy must stay
-  literally true — which is why it was rewritten to describe the one real
-  exception instead of pretending it doesn't exist:
-  **if she uses the optional "in your own words" box, that text is sent
+  literally true — which is why it was rewritten to describe the two real
+  exceptions instead of pretending they don't exist:
+  **getting past the gate sends the code she types to `/api/gate` to check
+  it — no personal data, just the code, every time the page loads. Beyond
+  that: if she uses the optional "in your own words" box, that text is sent
   once, at the end, to `/api/reflect` to generate a short Claude reflection,
   then discarded — nothing is stored on either end.** If she never touches
-  that box, nothing leaves her phone, same as before. This was a deliberate
+  that box, nothing else ever leaves her phone. This was a deliberate
   call after real back-and-forth about it (see git history around the
-  reflection feature) — don't quietly expand what that endpoint does
-  (e.g. logging notes, persisting results, adding other AI calls) without
+  reflection feature and the gate) — don't quietly expand what either
+  endpoint does (e.g. logging notes, persisting results, adding other AI
+  calls) without
   the same level of scrutiny; the whole point was informed consent, not
   "well, the door's already open." The per-question photos are real images
   but ship as base64 inside `index.html`, not fetched — that one stays a
   hard no, no exception.
 - **No storage.** No localStorage, sessionStorage, cookies, or IndexedDB.
   State lives in JS variables and dies with the tab — including the gate:
-  passing `GUEST.code` isn't remembered, so it's asked for again on every
+  passing it isn't remembered, so the code is asked for again on every
   fresh page load. That's the trade-off for the privacy claim staying
   literally true; don't "fix" it with a cookie or storage write.
 - **Vanilla JS only.** No React, no jQuery, no TypeScript.
@@ -208,19 +215,35 @@ render; a one-time gate you see exactly once doesn't need it.
   that's the first thing anyone editing this file should see. Guarded by a
   `validateFounder()` check right below it that `console.warn`s if
   `FOUNDER.key` doesn't match the quadrant `FOUNDER.anx`/`FOUNDER.avo` imply.
-- `GUEST{name, code, active}` — the gate. **This is a soft lock, not real
-  security**: the code and the comparison both live in plain JS in a static
-  file, so anyone with dev tools can read `GUEST.code` or just call
-  `show('cover')` themselves. What it's actually for: stopping a casual
-  "someone forwarded me the link" open, and giving you a kill switch —
-  `active:false` blocks the gate *and* any already-shared `#r=` result
-  link, unconditionally, regardless of the code. Flip it off the moment
-  she's done. `codeMatches(input)` is the one place the comparison lives
-  (trimmed, case-insensitive) — reuse it rather than re-comparing strings
-  inline. To hand this to the next person: change `name`/`code`, set
-  `active` back to `true`, ship it. `GUEST.code` ships as the placeholder
-  `"changeme"` on purpose, with a `console.warn` nagging until it's edited —
-  never let that placeholder go out as the real code.
+- `GUEST{name}` — just the gate's greeting ("Hi, Bree?"). The actual code
+  and the kill switch both live server-side now, in `api/gate.js`, driven
+  entirely by the `GATE_CODE` / `GATE_ACTIVE` environment variables. This
+  used to be `GUEST{name, code, active}` with the code hardcoded here and
+  a separate `codeMatches()` doing the comparison client-side — that setup
+  had a real, recurring problem: `GATE_CODE` (used by `api/reflect.js` for
+  its own soft check) had to be kept in sync with `GUEST.code` by hand,
+  and it was easy to update one and forget the other, or to just assume
+  changing the Vercel env var alone would change the actual password (it
+  didn't — the gate never looked at it). Now there's exactly one password,
+  in exactly one place, and changing it never touches this file: update
+  `GATE_CODE` in Vercel, hit Redeploy, done. **Still a soft lock, not real
+  security** — the check now happens server-side, which is a genuine
+  improvement (the code isn't sitting in plaintext in the shipped JS
+  anymore), but this is still a personal quiz gate, not an auth system.
+  `checkGateCode(input)` (async, calls `/api/gate`) is the one place the
+  client asks the question — reuse it rather than adding another fetch
+  inline. To hand this to the next person: change `GUEST.name` here,
+  change `GATE_CODE` in Vercel, redeploy. That's the whole migration.
+  **If you ever touch the gate's `.shake` CSS again**: it and `.rise` both
+  set the `animation` shorthand, which doesn't merge — whichever wins the
+  cascade wipes out the other's animation entirely, including `.rise`'s
+  "hold at opacity:1" forwards fill. `.shake` has explicit `opacity:1`/
+  `transform:none` specifically to survive that; removing them silently
+  makes the whole gate form permanently invisible (but still fully
+  functional underneath) the instant someone types a wrong code. This was
+  a real, shipped bug — caught late because the elements still had valid
+  layout/bounding boxes, so anything short of an actual screenshot missed
+  it.
 - `quadrantKey(anx, avo)` — the anx/avo → style-key quadrant logic, shared by
   `finish()` and the CONFIG validation guard. A `function` declaration (not
   `const`), so it's safe to call from CONFIG at the top of the file even
@@ -260,26 +283,29 @@ render; a one-time gate you see exactly once doesn't need it.
   that's already in the DOM. Needs no explicit `prefers-reduced-motion`
   override — it only sets opacity/transform via the keyframe, never as a
   base style, so disabling the animation naturally leaves it fully visible.
-- **The reflection feature** — the one network call in the whole app.
-  `finish()` calls `requestReflection(extras)` (fire-and-forget, right when
-  the deck starts, not when she reaches the page — by the time she's
-  clicked through a few results pages the response is usually already
-  back). It POSTs `buildReflectionPayload(extras)` — `{code, notes}`, where
-  `code` is `GUEST.code` and `notes` is her question/answer pairs — to
-  `/api/reflect`. `reflectionState` (`idle`/`pending`/`done`/`failed`) and
-  `reflectionText` are the only state; `showReflection()` is the `onShow`
-  for the "in your own words" page and just paints whatever the current
-  state is, so it's safe to call every time that page is (re)shown,
-  including before the fetch has settled. On failure (bad key, offline,
-  rate-limited, anything) it shows a plain "couldn't reach Claude" message
-  with a WhatsApp link to `HOLIDAY_WHATSAPP` — never a broken page, never a
-  silent retry loop. `buildReflectionPayload` is deliberately a pure
-  function separate from the `fetch()` call so the self-test can check its
-  shape without touching the network. See `api/reflect.js` for the server
-  side: it re-checks `code` against `GATE_CODE` (update both together when
-  you change `GUEST.code`), caps note count/length, and never persists
-  anything — that function is stateless by design, don't add a database
-  behind it.
+- **The reflection feature** — one of two network calls in the whole app
+  (the other is the gate check above). `finish()` calls
+  `requestReflection(extras)` (fire-and-forget, right when the deck
+  starts, not when she reaches the page — by the time she's clicked
+  through a few results pages the response is usually already back). It
+  POSTs `buildReflectionPayload(extras)` — `{code, notes}`, where `code`
+  is `ENTERED_CODE` (whatever she actually typed and had accepted at the
+  gate, kept in a plain in-memory variable, never stored) and `notes` is
+  her question/answer pairs — to `/api/reflect`. `reflectionState`
+  (`idle`/`pending`/`done`/`failed`) and `reflectionText` are the only
+  state; `showReflection()` is the `onShow` for the "in your own words"
+  page and just paints whatever the current state is, so it's safe to
+  call every time that page is (re)shown, including before the fetch has
+  settled. On failure (bad key, offline, rate-limited, anything) it shows
+  a plain "couldn't reach Claude" message with a WhatsApp link to
+  `HOLIDAY_WHATSAPP` — never a broken page, never a silent retry loop.
+  `buildReflectionPayload` is deliberately a pure function separate from
+  the `fetch()` call so the self-test can check its shape without
+  touching the network. See `api/reflect.js` for the server side: it
+  re-checks `code` against the same `GATE_CODE` env var `api/gate.js`
+  uses (nothing to keep in sync anymore — same variable, same source of
+  truth), caps note count/length, and never persists anything — that
+  function is stateless by design, don't add a database behind it.
 - **The PDF export** — `downloadPdf()` (wired to the "download the pdf"
   button on the "yours to keep" page, inside `fillShare()`) builds one
   plain HTML document out of the current `DECK` via `buildPrintHtml()` /

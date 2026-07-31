@@ -12,11 +12,12 @@
 
    Env vars required on Vercel (Project Settings → Environment Variables):
      ANTHROPIC_API_KEY  — your Anthropic key. Never exposed to the client.
-     GATE_CODE          — must match GUEST.code in index.html exactly.
-                           Not real security (nothing client-side is),
-                           just enough to stop a random bot that finds
-                           this URL from running up your Anthropic bill.
-                           Update this every time you change GUEST.code.
+     GATE_CODE          — the same entry code checked by api/gate.js.
+                           Not real security on its own, just enough to
+                           stop a random bot that finds this URL from
+                           running up your Anthropic bill. Nothing to
+                           keep in sync manually anymore — this is the
+                           one and only place the code lives.
 
    Zero npm dependencies on purpose — Vercel's Node runtime ships a
    global fetch, so a plain CommonJS function is enough. No package.json,

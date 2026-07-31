@@ -6,20 +6,23 @@ that reveals the founder's coordinate and the predicted dynamic between the
 two.
 
 Everything — markup, styles, and logic — lives in `index.html`. No build
-step, no dependencies, nothing stored. The one exception: `api/reflect.js`,
-a tiny serverless function that lets the optional "in your own words" box
-get a short Claude-generated reflection. See "The reflection feature"
-below — if you never set it up, that box still works fine, it just won't
-get a reflection back.
+step, no dependencies, nothing stored. Two small exceptions, both tiny
+serverless functions in `api/`:
+  - `api/gate.js` — checks the entry code she types in against the
+    `GATE_CODE` environment variable.
+  - `api/reflect.js` — lets the optional "in your own words" box get a
+    short Claude-generated reflection.
+
+See "Setting the access code" and "The reflection feature" below.
 
 ## Run it locally
 
-Open `index.html` directly in a browser, or serve it with `npx serve .`
-
-The gate + the whole quiz work with no setup at all. The reflection feature
-needs a real deployment (see below) — running from a plain static server,
-requesting a reflection will just fail gracefully and show the WhatsApp
-fallback message, which is expected.
+Serving `index.html` with a plain static server (e.g. `npx serve .`) gets
+you the quiz itself, but **not** the gate — `api/gate.js` won't be running,
+so the code check has nothing to talk to and will show "couldn't check
+that just now." For the full thing locally, use `npx vercel dev`, which
+runs the static file and both `api/*.js` functions together the same way
+production does.
 
 ## Deploy
 
@@ -27,19 +30,26 @@ fallback message, which is expected.
 npx vercel --prod
 ```
 
-That's it — Vercel auto-detects the `api/reflect.js` serverless function
+That's it — Vercel auto-detects both `api/*.js` serverless functions
 alongside the static `index.html`, no config file needed.
 
 ### Environment variables (set in Vercel → Project Settings → Environment Variables)
 
 | Variable | What it's for |
 |---|---|
+| `GATE_CODE` | **The** entry code — the one and only place it lives. Checked by both `api/gate.js` (the actual gate) and `api/reflect.js` (a soft check, to stop a random bot from running up your Anthropic bill). Nothing in `index.html` needs to match it; there's nothing to keep in sync. |
+| `GATE_ACTIVE` | Optional, defaults to `true`. Set to `false` to lock the link instantly — the kill switch, no code change needed. |
 | `ANTHROPIC_API_KEY` | Your Anthropic API key. Never exposed to the client — only `api/reflect.js` reads it, server-side. |
-| `GATE_CODE` | Must exactly match `GUEST.code` in `index.html`. Not real security (nothing client-side is), just enough to stop a random bot that finds the `/api/reflect` URL from running up your Anthropic bill. **Update this every time you change `GUEST.code`** — they're not linked automatically. |
 
-Without `ANTHROPIC_API_KEY` set, `/api/reflect` returns an error and the
-app shows its normal "couldn't reach Claude" fallback — nothing breaks,
-she just doesn't get a reflection.
+Changing any of these takes effect on your **next deployment** — Vercel
+doesn't hot-reload env vars into an already-running deployment. After
+changing one in the dashboard, go to Deployments → latest → ⋯ → Redeploy.
+No code edit, no `git push` required — just the redeploy.
+
+Without `GATE_CODE` set, the gate always says "this link isn't set up
+yet." Without `ANTHROPIC_API_KEY` set, `/api/reflect` returns an error and
+the app shows its normal "couldn't reach Claude" fallback — nothing
+breaks, she just doesn't get a reflection.
 
 ## The reflection feature
 
@@ -67,17 +77,17 @@ top of the `<script>` block in `index.html`. Edit `name`, `anx`, `avo`,
 
 ## Setting the access code
 
-The `GUEST` object (also near the top of `<script>`) controls who gets in:
+Change the `GATE_CODE` environment variable in Vercel, then Redeploy. That's
+the whole process — no code edit, no `git push`. Same for locking the link:
+set `GATE_ACTIVE` to `false` and Redeploy; everyone (including anyone with
+an old result link) gets "this link's been put to sleep." Flip it back to
+`true` (or delete the variable) and Redeploy to reopen it.
+
+The only thing still in `index.html` is the `GUEST` object, and it's purely
+cosmetic now — just the name used in the gate's greeting ("Hi, Bree?"):
 
 ```js
 const GUEST = {
-  name: "Bree",     // used in the gate's greeting
-  code: "JUL26",    // what she types in to get past the gate
-  active: true      // flip to false to lock everyone out, instantly,
-                     // including anyone with an old result link
+  name: "Bree"
 };
 ```
-
-If you're also using the reflection feature, remember to update the
-`GATE_CODE` environment variable in Vercel to match `code` whenever you
-change it — see the table above.

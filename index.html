@@ -241,7 +241,17 @@ h1 em{
 .code-input:focus-visible{border-color:var(--glass-brd-hi)}
 .gate-msg{font-size:14px;line-height:1.6;color:var(--warm-ink);margin-top:16px;min-height:1.6em}
 .gate-msg.ok{color:var(--cool-ink)}
-.shake{animation:shake .4s var(--ease)}
+/* .shake and .rise both set the `animation` shorthand, and shorthands
+   don't merge — whichever rule wins the cascade wipes out the other's
+   entire animation, including .rise's "hold at opacity:1" fill-mode.
+   Without the explicit opacity/transform here, adding .shake to an
+   already-risen element (exactly what happens on a wrong gate code)
+   makes it fall back to .rise's un-animated base state — opacity:0 —
+   permanently, since nothing ever removes .shake afterwards. Learned
+   this one from a real bug: the gate form silently vanished, forever,
+   the moment someone typed a wrong code, even though it was still
+   fully present and functional underneath. */
+.shake{opacity:1;transform:none;animation:shake .4s var(--ease)}
 @keyframes shake{
   0%,100%{transform:translateX(0)}
   20%{transform:translateX(-8px)} 40%{transform:translateX(7px)}
@@ -737,7 +747,7 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
     </form>
     <p class="gate-msg" id="gateMsg" aria-live="polite"></p>
 
-    <p class="note rise d5">Nothing here is saved or sent — the code just checks itself, right here in your browser.</p>
+    <p class="note rise d5">The code gets checked against a server, but that's all it sends — nothing here is saved or logged.</p>
   </div>
 
   <!-- ══════════ COVER ══════════ -->
@@ -845,27 +855,24 @@ const FOUNDER = {
 })();
 
 /* ══════════════════════════════════════════════════════════
-   GUEST — who's allowed in, and the kill switch.
+   GUEST — just the personalization. The actual code and the kill
+   switch both live server-side now — see api/gate.js.
    ══════════════════════════════════════════════════════════
-   This is a soft gate, not real security — it's plain JS sitting
-   in a static file, so anyone who opens dev tools can read the
-   code or skip the screen outright. What it actually buys you:
-   it stops a casual "someone forwarded me a link" open, and it
-   gives you a kill switch. Flip `active` to false the moment
-   she's done the test and this link — even an old result link
-   she already has — goes dead. Nobody reopens it after that,
-   code or no code.
+   This used to also hold `code` and `active` as plain JS constants,
+   which meant changing the password meant editing this file,
+   committing, and pushing — and the code checked here had to be
+   kept in sync by hand with GATE_CODE (used by /api/reflect). It was
+   easy to update one and forget the other. Now GATE_CODE (Vercel
+   env var, see api/gate.js) is the one and only place the code
+   lives, and GATE_ACTIVE (also an env var) is the kill switch —
+   both changeable from the Vercel dashboard, no code edits, no git
+   push. Just click Redeploy after changing either one.
 
-   To hand this to the next person: change name/code, set active
-   back to true, ship it. That's the whole migration.            */
+   To hand this to the next person: change `name` here, change
+   GATE_CODE in Vercel, redeploy. That's the whole migration.     */
 const GUEST = {
-  name: "Bree",
-  code: "JUL26",
-  active: true
+  name: "Bree"
 };
-if (GUEST.code === "changeme"){
-  console.warn('GUEST.code is still the placeholder "changeme" — set a real code before sending this link to anyone.');
-}
 
 /* ══════════════════════════════════════════════════════════
    REFLECT — the one thing on this page that touches a network.
@@ -874,20 +881,41 @@ if (GUEST.code === "changeme"){
    exception: if she uses the optional "in your own words" box, that
    text is sent once, at the end, to /api/reflect (a tiny serverless
    function — see api/reflect.js) which asks Claude for a short
-   reflection on it. Nothing is stored anywhere, on either end — the
+   reflection on it.    Nothing is stored anywhere, on either end — the
    request happens, the response gets shown once, that's the whole
    lifecycle. If she never touches the free-text box, this never fires
    and nothing ever leaves her phone, same as before.
-   `GATE_CODE` on the server must match `GUEST.code` above — update
-   both together when you change the code. */
+
+   The gate check (api/gate.js, right below) is a second, small
+   exception: getting past the gate sends the code she typed to the
+   server to check against GATE_CODE. No personal answers, just the
+   code — but it does mean the gate itself needs a network call now,
+   unlike before. */
 const REFLECT_ENDPOINT = '/api/reflect';
+const GATE_ENDPOINT = '/api/gate';
 const HOLIDAY_WHATSAPP = '27846084968';   // used only for the "couldn't reach Claude" fallback
 
-function codeMatches(input){
-  return GUEST.active
-    && typeof input === 'string'
-    && input.trim().length > 0
-    && input.trim().toLowerCase() === GUEST.code.trim().toLowerCase();
+/* the code she actually typed in and had accepted, kept in memory only
+   (never written to storage) so it can be forwarded once to /api/reflect
+   for its own soft check — see buildReflectionPayload() below */
+let ENTERED_CODE = '';
+
+async function checkGateCode(input){
+  const code = typeof input === 'string' ? input.trim() : '';
+  if (!code) return { ok:false, reason:'empty' };
+  let res;
+  try {
+    res = await fetch(GATE_ENDPOINT, {
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body: JSON.stringify({ code })
+    });
+  } catch (e){
+    return { ok:false, reason:'network' };
+  }
+  const data = await res.json().catch(()=>null);
+  if (!data || typeof data.ok !== 'boolean') return { ok:false, reason:'network' };
+  return data;
 }
 
 /* ══════════════════ THE QUESTIONS ══════════════════
@@ -1248,7 +1276,7 @@ let reflectionPromise = null;
 
 function buildReflectionPayload(extras){
   return {
-    code: GUEST.code,
+    code: ENTERED_CODE,
     notes: extras.map(x => ({ q: x.q, a: x.a }))
   };
 }
@@ -1993,28 +2021,50 @@ function enterApp(){
   show('cover');
 }
 
-if (!GUEST.active){
-  el('gateForm').hidden = true;
-  el('gateMsg').textContent = "This link's been put to sleep — ask him for a fresh one.";
-} else {
-  el('gateForm').addEventListener('submit', e=>{
-    e.preventDefault();
-    if (codeMatches(el('gateCode').value)){
-      el('gateMsg').textContent = '';
-      enterApp();
-      window.scrollTo({top:0});
-    } else {
-      el('gateMsg').textContent = "That's not the one — try again.";
-      const form = el('gateForm');
-      form.classList.remove('shake'); void form.offsetWidth; form.classList.add('shake');
-      el('gateCode').select();
-    }
-  });
-}
+el('gateForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const input = el('gateCode');
+  const btn = el('gateForm').querySelector('button');
+  input.disabled = true; btn.disabled = true;
+  el('gateMsg').textContent = 'checking…';
+
+  const result = await checkGateCode(input.value);
+
+  input.disabled = false; btn.disabled = false;
+
+  if (result.ok){
+    ENTERED_CODE = input.value.trim();
+    el('gateMsg').textContent = '';
+    enterApp();
+    window.scrollTo({top:0});
+    return;
+  }
+
+  if (result.reason === 'inactive'){
+    el('gateForm').hidden = true;
+    el('gateMsg').textContent = "This link's been put to sleep — ask him for a fresh one.";
+    return;
+  }
+
+  if (result.reason === 'not_configured'){
+    el('gateMsg').textContent = "This link isn't set up yet — ask him to add a code.";
+    return;
+  }
+
+  if (result.reason === 'network'){
+    el('gateMsg').textContent = "Couldn't check that just now — check your connection and try again.";
+    return;
+  }
+
+  el('gateMsg').textContent = "That's not the one — try again.";
+  const form = el('gateForm');
+  form.classList.remove('shake'); void form.offsetWidth; form.classList.add('shake');
+  input.select();
+});
 
 /* ── self-test, only behind ?test=1, zero weight otherwise ── */
 if (new URLSearchParams(location.search).get('test') === '1'){
-  (function runSelfTest(){
+  (async function runSelfTest(){
     const results = [];
     const assert = (name, cond) => results.push({ name, pass: !!cond });
 
@@ -2030,18 +2080,38 @@ if (new URLSearchParams(location.search).get('test') === '1'){
     assert('there is a gut-check line for every question', GUT.length > 0);
 
     assert('GUEST.name is set', typeof GUEST.name === 'string' && GUEST.name.trim().length > 0);
-    assert('GUEST.code is set', typeof GUEST.code === 'string' && GUEST.code.trim().length > 0);
-    assert('GUEST.active is a boolean', typeof GUEST.active === 'boolean');
-    (function(){
-      const savedActive = GUEST.active;
-      GUEST.active = true;
-      assert('codeMatches accepts the correct code', codeMatches(GUEST.code));
-      assert('codeMatches is case/whitespace-insensitive', codeMatches('  ' + GUEST.code.toUpperCase() + '  '));
-      assert('codeMatches rejects a wrong code', !codeMatches(GUEST.code + '-nope'));
-      assert('codeMatches rejects an empty code', !codeMatches(''));
-      GUEST.active = false;
-      assert('codeMatches rejects everything once GUEST.active is false', !codeMatches(GUEST.code));
-      GUEST.active = savedActive;
+
+    // checkGateCode talks to /api/gate now, not a client-side constant —
+    // mock fetch to test the client-side contract without a real network
+    // call or a running server
+    await (async function(){
+      const real = window.fetch;
+      let called = false;
+      window.fetch = (...a) => { called = true; return real.apply(window, a); };
+      const emptyResult = await checkGateCode('');
+      assert('checkGateCode rejects an empty code without ever calling fetch', !called && emptyResult.ok === false);
+
+      const mockFetch = (ok, reason) => () => Promise.resolve({
+        json: () => Promise.resolve(reason ? { ok, reason } : { ok })
+      });
+
+      window.fetch = mockFetch(true);
+      let r = await checkGateCode('whatever');
+      assert('checkGateCode accepts whatever the server says ok to', r.ok === true);
+
+      window.fetch = mockFetch(false);
+      r = await checkGateCode('wrong');
+      assert('checkGateCode passes through a plain rejection', r.ok === false && !r.reason);
+
+      window.fetch = mockFetch(false, 'inactive');
+      r = await checkGateCode('anything');
+      assert('checkGateCode passes through the inactive reason', r.ok === false && r.reason === 'inactive');
+
+      window.fetch = () => Promise.reject(new Error('offline'));
+      r = await checkGateCode('anything');
+      assert('checkGateCode turns a network failure into reason:network, not a thrown error', r.ok === false && r.reason === 'network');
+
+      window.fetch = real;
     })();
     assert('QIMG has exactly one image per question', Array.isArray(QIMG) && QIMG.length === Q.length);
     QIMG.forEach((u,qi)=> assert(`QIMG[${qi}] looks like a data URI`, typeof u === 'string' && u.startsWith('data:image/')));
@@ -2153,9 +2223,12 @@ if (new URLSearchParams(location.search).get('test') === '1'){
     // buildReflectionPayload — the only part of the /api/reflect round trip
     // that's testable without an actual network call
     (function(){
+      const savedCode = ENTERED_CODE;
+      ENTERED_CODE = 'test-code-123';
       const extras = [{q:'Q one', a:'note one'}, {q:'Q two', a:'note two'}];
       const payload = buildReflectionPayload(extras);
-      assert('reflection payload carries the current gate code', payload.code === GUEST.code);
+      assert('reflection payload carries the code that was actually accepted at the gate', payload.code === ENTERED_CODE);
+      ENTERED_CODE = savedCode;
       assert('reflection payload has one note per extra', Array.isArray(payload.notes) && payload.notes.length === 2);
       assert('reflection payload notes keep q/a only', payload.notes[0].q === 'Q one' && payload.notes[0].a === 'note one');
       assert('reflection payload is JSON-serialisable', typeof JSON.stringify(payload) === 'string');
