@@ -89,10 +89,36 @@ like a SaaS onboarding flow, it is wrong.
   don't remove that gradient, and don't let the card grow tall enough to
   crowd the options off a small phone screen (`clamp()` keeps it responsive
   to viewport height already; adjust the clamp, not a fixed height).
-- **Word-pop text.** `.qtext`, `.verdict` and `.chtitle` reveal word-by-word
-  on a spring ease — the "in your face" gimmick. It's decorative flair, not
-  a substitute for the type system above; don't reach for a different font
-  or a louder colour to chase the same effect.
+- **Word-pop text.** `.qtext`, `.verdict`, `.chtitle`, `.pull` quotes, and the
+  cover/gate `.lede` all reveal word-by-word — the "in your face" gimmick,
+  now used everywhere rather than only on text that changes every render
+  (see the `animateWords()` architecture note for how a static one-time
+  line joins the surrounding `.rise` stagger instead of popping in at
+  `t=0`). It used to be a bouncy spring ease with a little rotate on each
+  word; that read as "playful" but not "calm", so it's now a slower,
+  overshoot-free rise — the brief was "flowy like a calm river", not a
+  bounce. It's decorative flair, not a substitute for the type system
+  above; don't reach for a different font or a louder colour to chase the
+  same effect.
+- **Emphasis pulses.** `<b>` inside real prose (chapter body, `.note`,
+  her own quoted words) gets a soft highlighter-pen background plus a
+  slow, low-amplitude glow pulse — `<em>` in the same contexts gets a
+  flat colour tint, no pulse, so the two don't compete for attention.
+  Both are deliberately subtle (slow cycle, small glow, no scale/skew)
+  so they read as "alive" without undermining "quick to read" — this
+  is not the place to make the pulse bigger or faster for more punch.
+- **Scroll reveal.** Long deck pages (chapters, pairing analysis, "in
+  your own words", the share page) fade their paragraphs/cards up as
+  they cross into view — see `initScrollReveal()`. The `.reveal` class
+  is only ever added by that function immediately before it starts
+  observing, never baked into a template, specifically so a missing
+  `IntersectionObserver` or a JS error can never leave real content
+  stuck invisible — untouched, everything defaults to fully visible.
+  Quiz answer options get their own short staggered rise too
+  (`.opt-pop`, via `tagOptionEntrance()`), but only when a *new*
+  question renders, never on the toggle-triggered re-render a pick
+  causes — see the render()/toggleOpt() split, this one's easy to get
+  wrong and would make picking an option feel laggy instead of snappy.
 - **Colour has two jobs, and they need different values.** The four pastel
   accents (`--warm` rose, `--cool` sage, `--gold` honey, `--violet` plum) are
   for **fills, dots, bars and tints only**. As small text on cream they fail
@@ -106,10 +132,7 @@ like a SaaS onboarding flow, it is wrong.
 It reads like a book, not a page. Four screens: the gate, cover, questions,
 and the deck. The gate reuses the cover's visual language (`.eyebrow`, `h1`,
 `.lede`, `.note`, `.cta`) rather than inventing a "login form" look — it's
-the front door of the same book, not a separate product. It's also the one
-static headline that deliberately skips the word-pop treatment (see
-`animateWords()`) — that gimmick is reserved for text that changes on every
-render; a one-time gate you see exactly once doesn't need it.
+the front door of the same book, not a separate product.
 
 - **The frame is pinned.** On `#quiz` and `#deck` the wrap is exactly one
   viewport tall (`body[data-screen=...]`), the nav sits at the bottom, and
@@ -294,13 +317,27 @@ render; a one-time gate you see exactly once doesn't need it.
   "this is you," people skim. It nudges the label's y (flips below the dot
   near the top edge) and x/anchor (shifts inward near the left/right edges)
   so it never clips the canvas or sits on top of a corner's quadrant name.
-- `animateWords(node, text?)` — splits text into `.word-pop` spans with a
-  staggered spring-eased entrance, used for `.qtext`, `.verdict` and
-  `.chtitle` (anything that shows fresh text on every render). Reads
-  `node.textContent` when `text` is omitted, so it can restyle markup
-  that's already in the DOM. Needs no explicit `prefers-reduced-motion`
-  override — it only sets opacity/transform via the keyframe, never as a
-  base style, so disabling the animation naturally leaves it fully visible.
+- `animateWords(node, text?, startDelay?)` — splits text into `.word-pop`
+  spans with a staggered, overshoot-free entrance. Used for `.qtext`,
+  `.verdict`, `.chtitle`, deck `.pull` quotes, and the cover/gate `.lede`.
+  Reads `node.textContent` when `text` is omitted, so it can restyle markup
+  that's already in the DOM. Only works on plain text — it wipes and
+  rebuilds `node.textContent`, so never call it on an element containing
+  real markup like `<b>`/`<em>` (chapter body paragraphs, `.note`), or
+  that markup gets flattened to plain text. `startDelay` (in "word slots"
+  of 55ms) is for the two one-time `.lede` calls specifically: those
+  elements dropped their `.rise d3` class in favour of animateWords, so
+  without a manual offset their words would start popping at `t=0`,
+  ahead of the `.rise`-animated headline above them — `4.5` lines them
+  back up with where `d3` used to put them. Needs no explicit
+  `prefers-reduced-motion` override — it only sets opacity/transform via
+  the keyframe, never as a base style, so disabling the animation
+  naturally leaves it fully visible.
+- `initScrollReveal(container)` / `tagOptionEntrance(container)` — see
+  "Scroll reveal" above. `initScrollReveal` is called from `renderPage()`
+  after each deck page's `innerHTML` is set; `tagOptionEntrance` is
+  called from `render()` (a new question), never from `toggleOpt()`'s
+  re-render of the same question's options.
 - **The reflection feature** — one of two network calls in the whole app
   (the other is the gate check above). `finish()` calls
   `requestReflection(extras)` (fire-and-forget, right when the deck

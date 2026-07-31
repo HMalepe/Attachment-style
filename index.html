@@ -177,6 +177,26 @@ header{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
 .screen.on{display:block}
 .rise{opacity:0;transform:translateY(16px);animation:rise .8s var(--ease) forwards}
 @keyframes rise{to{opacity:1;transform:none}}
+
+/* scroll-reveal for long pages (chapters, pairing analysis, "in your
+   own words", the share page) — content fades and floats up as it
+   crosses into view, via IntersectionObserver (see initScrollReveal()
+   in the script). The .reveal class itself is only ever added by that
+   function, right before it starts observing an element, and only
+   when IntersectionObserver exists — so nothing can ever get stuck
+   invisible if JS is slow, disabled, or the API is missing; the
+   default state for anything not explicitly opted in is fully
+   visible. */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s var(--ease), transform .7s var(--ease)}
+.reveal.seen{opacity:1;transform:none}
+
+/* the quiz's answer options rise in with a short stagger the moment a
+   *new* question renders — not on every toggle/re-render, or picking
+   an option would re-trigger every card's entrance and feel laggy
+   instead of snappy. See the render()/toggleOpt() split in the script:
+   only render() (a genuinely new question) calls tagOptionEntrance(). */
+.opt-pop{animation:optRise .5s var(--ease) both;animation-delay:calc(var(--od,0) * 65ms)}
+@keyframes optRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.25s}.d4{animation-delay:.35s}.d5{animation-delay:.45s}
 
 /* ---------- cover ---------- */
@@ -199,7 +219,8 @@ h1 em{
   color:var(--text);max-width:22ch;
 }
 .note{font-size:15px;line-height:1.7;color:var(--muted);margin-top:20px;max-width:52ch}
-.note b{color:var(--text);font-weight:500}
+/* .note b styling lives with the other prose-emphasis rules, near
+   .chbody, so all three "real prose" contexts share one definition */
 
 .cta{
   position:relative;overflow:hidden;
@@ -331,18 +352,22 @@ h1 em{
   margin-bottom:26px;max-width:26ch;
   font-variation-settings:'opsz' 48;
 }
-/* word-by-word reveal for headline text that changes on every render —
-   questions, verdict, chapter titles. Pure gimmick, spring-eased so it
-   reads as "playful" rather than "laggy"; disabled wholesale by the
+/* word-by-word reveal for headline-style text — questions, verdict,
+   chapter titles, ledes, pull quotes. Pure gimmick. Used to be a
+   bouncy spring pop (overshoot + a little rotate); that read as
+   "playful" but not "calm" — restyled to a slower, smoother rise with
+   no overshoot so a whole sentence reads like it's surfacing out of
+   still water, one word after the next, rather than each word
+   individually bouncing into place. Disabled wholesale by the
    prefers-reduced-motion block below since it only sets state via
    keyframes, never as a base style. */
 .word-pop{
   display:inline-block;
-  animation:wordPop .6s var(--spring) both;
-  animation-delay:calc(var(--wd,0) * 45ms);
+  animation:wordPop .85s var(--ease) both;
+  animation-delay:calc(var(--wd,0) * 55ms);
 }
 @keyframes wordPop{
-  from{opacity:0;transform:translateY(.4em) rotate(-2deg) scale(.94)}
+  from{opacity:0;transform:translateY(.5em)}
   to{opacity:1;transform:none}
 }
 .opts{display:flex;flex-direction:column;gap:11px}
@@ -542,7 +567,26 @@ section.blk li::before{content:'';position:absolute;left:2px;top:9px;width:7px;h
 }
 .chbody p{font-size:16.5px;line-height:1.72;color:var(--text-2);margin-bottom:15px;max-width:62ch}
 .chbody p:last-child{margin-bottom:0}
-.chbody p b{color:var(--text);font-weight:500}
+/* emphasis inside real prose — chapter body, notes, her own quoted
+   words — gets more than a color/weight bump: a soft highlighter-pen
+   background plus a slow, low-amplitude glow pulse, so the phrases
+   that matter most visually lift instead of just reading slightly
+   heavier. Deliberately subtle (slow cycle, small glow) so it stays
+   "quick to read" rather than "busy" — killed along with every other
+   animation under prefers-reduced-motion, same as everything else. */
+.chbody p b, .note b, .quoted p b, .invite p b{
+  color:var(--warm-ink);font-weight:700;
+  background:var(--blush);border-radius:.3em;padding:.02em .22em;
+  box-decoration-break:clone;-webkit-box-decoration-break:clone;
+  animation:emphasisGlow 3.2s ease-in-out infinite;
+}
+@keyframes emphasisGlow{
+  0%,100%{box-shadow:0 0 0 0 rgba(163,58,85,0)}
+  50%{box-shadow:0 0 0 4px rgba(246,220,216,.6)}
+}
+.chbody p em, .note em, .quoted p em, .invite p em{
+  color:var(--violet-ink);font-style:italic;
+}
 .pull{
   position:relative;
   border-left:2px solid transparent;
@@ -674,6 +718,7 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
   *{animation:none!important;transition:none!important}
   .rise{opacity:1;transform:none}
   .page{opacity:1;transform:none}
+  .reveal{opacity:1;transform:none}
   body::after{animation:none}
 }
 
@@ -784,7 +829,7 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
     <div class="gate-dots" aria-hidden="true"><span></span><span></span><span></span></div>
     <div class="eyebrow rise d1">before we start</div>
     <h1 class="rise d2">Hi, <em id="gateName">Bree</em><span class="gate-ellipsis">…</span></h1>
-    <p class="lede rise d3">You know the code, now type it in.</p>
+    <p class="lede" id="gateLede">You know the code, now put it in.</p>
     <p class="note rise d4">He gave you a code. Type it in and we'll get going.</p>
 
     <form class="gate-form rise d4" id="gateForm" autocomplete="off">
@@ -801,7 +846,7 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
   <div class="screen" id="cover">
     <div class="eyebrow rise d1">hi — come in</div>
     <h1 class="rise d2">Prox<em>i</em>mity</h1>
-    <p class="lede rise d3">Eighteen questions about how you do closeness. Four minutes. Then I’ll tell you exactly what he is, and what the two of you are in for.</p>
+    <p class="lede" id="coverLede">Eighteen questions about how you do closeness. Four minutes. Then I’ll tell you exactly what he is, and what the two of you are in for.</p>
 
     <div class="axes rise d4">
       <div class="axis w">
@@ -1791,17 +1836,65 @@ function loopSVG(){
 /* ── word-by-word reveal for headline text that changes on every render.
    Reads node.textContent when no explicit text is passed, so it can be
    pointed at markup already built from a template (verdict, chtitle). ── */
-function animateWords(node, text){
+function animateWords(node, text, startDelay){
   const t = text !== undefined ? text : node.textContent;
   node.textContent = '';
+  // startDelay (in "word slots" of 55ms) lets a one-time static line
+  // — a lede sitting under a .rise-animated h1 — join the surrounding
+  // entrance stagger instead of popping in at t=0, ahead of the
+  // headline above it. Pure text elements only get this; leave it
+  // unset for anything that already has its own rise/d-class timing.
   t.split(' ').forEach((w, idx)=>{
     if (w === ''){ node.appendChild(document.createTextNode(' ')); return; }
     const span = document.createElement('span');
     span.className = 'word-pop';
-    span.style.setProperty('--wd', idx);
+    span.style.setProperty('--wd', idx + (startDelay || 0));
     span.textContent = w;
     node.appendChild(span);
     node.appendChild(document.createTextNode(' '));
+  });
+}
+
+/* scroll-reveal for the deck's longer pages — see the .reveal/.seen
+   CSS. Deliberately adds the .reveal (opacity:0) class itself, right
+   before observing, rather than baking it into the HTML templates —
+   so a missing IntersectionObserver (or this function never running)
+   can never leave content stuck invisible; the untouched default is
+   just... visible. Elements already in view when a page opens still
+   get their entrance — the observer fires immediately for anything
+   already intersecting, so a short page just cascades in as it draws,
+   no actual scrolling required. */
+/* .pull isn't in here — it already gets its own word-by-word flow via
+   animateWords() below, and fading the whole quote in as a block on
+   top of that would just double the motion on the same text. */
+const REVEAL_SELECTOR = 'p, .grid-card, .quoted, .invite, .share, .chnav, ul.lede-list, .reflection, .other-wrap, section.blk';
+function initScrollReveal(container){
+  if (!('IntersectionObserver' in window)) return;
+  const all = [...container.querySelectorAll(REVEAL_SELECTOR)];
+  // drop anything nested inside another match — a <p> inside a
+  // .grid-card shouldn't get its own separate fade on top of the
+  // card's, that's two staggered animations for one visual unit
+  const targets = all.filter(el => !all.some(other => other !== el && other.contains(el)));
+  if (!targets.length) return;
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if (e.isIntersecting){ e.target.classList.add('seen'); io.unobserve(e.target); }
+    });
+  }, { root: container, threshold:.15, rootMargin:'0px 0px -6% 0px' });
+  targets.forEach((el, idx)=>{
+    el.classList.add('reveal');
+    el.style.transitionDelay = Math.min(idx, 6) * 55 + 'ms';
+    io.observe(el);
+  });
+}
+
+/* the answer options rising in with a stagger the moment a *new*
+   question renders — see the .opt-pop CSS for why this is only ever
+   called from render(), never from toggleOpt()'s re-render. */
+function tagOptionEntrance(container){
+  [...container.children].forEach((el, idx)=>{
+    el.classList.add('opt-pop');
+    el.style.setProperty('--od', idx);
   });
 }
 
@@ -1818,6 +1911,7 @@ function render(){
   el('qimgEl').src = QIMG[i];
 
   renderOptions();
+  tagOptionEntrance(el('opts'));
   renderOther();
   updateNextBtn();
 
@@ -1988,8 +2082,8 @@ function renderPage(dir){
   el('deckProg').style.transform = `scaleX(${(page+1)/DECK.length})`;
   const body = el('pageBody');
   body.innerHTML = pg.html;
-  const heading = body.querySelector('.verdict, .chtitle');
-  if (heading) animateWords(heading);
+  body.querySelectorAll('.verdict, .chtitle, .pull').forEach(node => animateWords(node));
+  initScrollReveal(body);
   el('deckBack').style.visibility = page === 0 ? 'hidden' : 'visible';
   el('deckNext').style.visibility = page === DECK.length-1 ? 'hidden' : 'visible';
   el('again').style.visibility = page === DECK.length-1 ? 'visible' : 'hidden';
@@ -2076,8 +2170,16 @@ paintField(0, 0, false);
    happens right after the code is accepted. See GUEST up top for what
    this gate can and can't do. ── */
 el('gateName').textContent = GUEST.name;
+// static, one-time screens still get the word-flow treatment now —
+// see the .word-pop CLAUDE.md note for why this used to be reserved
+// for text that changes on every render, and why that rule was dropped.
+// startDelay=4.5 (~250ms) lines it up with the d3 stagger the .rise
+// elements around it are still using, so it doesn't pop in before the
+// headline above it does.
+animateWords(el('gateLede'), undefined, 4.5);
 
 function enterApp(){
+  animateWords(el('coverLede'), undefined, 4.5);
   if (location.hash.startsWith('#r=')){
     const dec = decodeAnswers(location.hash.slice(3));
     if (dec.ok){
