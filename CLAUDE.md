@@ -279,7 +279,13 @@ the front door of the same book, not a separate product.
   purely decorative — lifted from a design reference, nothing is
   actually loading — and gets killed along with every other animation
   by the site-wide `prefers-reduced-motion` block, same as everything
-  else. The actual code
+  else. The gate's server-check note ends with "Ska wara." — Sepedi for
+  "don't worry" — a small, deliberate personal touch on the one line that's
+  explaining the gate's one real network call; keep it if that line's
+  copy changes again. The "before we start" eyebrow that used to sit above
+  the gate's `<h1>` was cut entirely (not replaced) — the gate is the front
+  door of the book, and a chrome label above the very first thing she reads
+  worked against that, not for it. The actual code
   and the kill switch both live server-side now, in `api/gate.js`, driven
   entirely by the `GATE_CODE` / `GATE_ACTIVE` environment variables. This
   used to be `GUEST{name, code, active}` with the code hardcoded here and
