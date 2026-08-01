@@ -137,8 +137,22 @@ the front door of the same book, not a separate product.
 - **The frame is pinned.** On `#quiz` and `#deck` the wrap is exactly one
   viewport tall (`body[data-screen=...]`), the nav sits at the bottom, and
   `#pageBody` / `#qcard` flex to fill and scroll *internally* if a page runs
-  long. It gets a "there's a bit more" hint that appears only when a page
-  actually overflows.
+  long. It gets a "there's a bit more" hint (`.more`, `#qmore`/`#more`) that
+  appears only when a page actually overflows, on both screens —
+  `checkQuizOverflow()` mirrors the `has-more` logic `renderPage()` already
+  did for the deck.
+  **`.qfoot` used to be a child of `#qcard`, not a sibling** — unlike
+  `#deck`, where `.chnav` was always correctly a sibling of `#pageBody`.
+  That meant the quiz's back/next nav scrolled away *with* the question
+  content instead of staying pinned, and on a question with a long "other"
+  note typed in, the next button could end up sitting half off the bottom
+  of the screen with nothing telling her to scroll for it — no `.more` hint
+  existed for `#quiz` at all back then. Fixed by moving `.qfoot` out to be
+  a sibling of `#qcard` (matching `.chnav`/`#pageBody`) and giving it the
+  same `border-top` nav-bar treatment, then adding the missing `.more`
+  hint + `checkQuizOverflow()` (called from `render()`, from opening/typing
+  in the "other" box, and cleared by a scroll listener on `#qcard` — same
+  three triggers `renderPage()`/`#pageBody` already had for the deck).
   **Gotcha:** any direct child of `#pageBody`/`#qcard` that has its own
   `overflow:hidden` (every "card" class — `.grid-card`, `.pairbox`,
   `.invite`, `.share`) loses the flexbox auto-min-size protection that
@@ -223,6 +237,24 @@ the front door of the same book, not a separate product.
   payload back down, drop `WIDTH` before you drop `QUALITY` — resolution
   is what reads as sharp on a retina screen, quality mostly just adds
   JPEG artifacting in flat areas.
+  **Resolution isn't the only thing that reads as "low quality" — exposure
+  is.** Q16 (the "he's in a bad mood" door photo) measured ~90% near-black
+  pixels; in the small `.qimg` crop it rendered as an almost solid black
+  rectangle with the bottom-scrim gradient over it, which reads as "this
+  broke" rather than "this is moody," even though the source file itself
+  was a perfectly sharp 1200×800 JPEG. Checked every image's mean
+  brightness and dark-pixel % (`ImageStat.Stat`) rather than trusting a
+  glance — Q9 and Q5 are also dark (sunset street, lamplit nightstand) but
+  have real midtone/colour detail throughout, so they read as intentional
+  mood, not a rendering failure; only Q16 (and Q18, a candle in near-total
+  black, left alone since the flame is the whole point of that shot and
+  is already the crop's focal point) were true outliers. Fixed Q16 with a
+  gamma lift (`im.point()`, γ≈1.9) plus a small contrast/saturation bump
+  to counter the flatness a shadow-lift causes, re-encoded at the same
+  JPEG quality — not a resize, so it's still base64-swapped into the same
+  `QIMG[15]` slot. No PNG source existed to redo this from scratch (see
+  above), so this was a levels adjustment on the shipped JPEG itself, done
+  once and checked visually before/after rather than applied blindly.
 - `P{}` — the four style profiles. Copy lives here.
 - `PAIRS{}` — 10 pairwise dynamics, keyed by `pairKey()` (sorted, pipe-joined).
 - `GUT[]` — the rotating gut-check line shown under every question.
@@ -317,6 +349,19 @@ the front door of the same book, not a separate product.
   "this is you," people skim. It nudges the label's y (flips below the dot
   near the top edge) and x/anchor (shifts inward near the left/right edges)
   so it never clips the canvas or sits on top of a corner's quadrant name.
+  **That edge-flip alone isn't enough right in an actual corner** — a
+  near-0/near-0 result (a very secure score) flips the label a few px away
+  from the top edge, but `gridBase()`'s own "SECURE" text is *also* only a
+  few px from that same edge, so the flip lands the "YOU" label right back
+  on top of it. Found by actually screenshotting an extreme-corner result,
+  not by reading the code — it looks fine for any "normal" middling score,
+  which is probably why it shipped. The fix adds a second check specific
+  to corners (near-top-or-bottom *and* near-left-or-right at once) that
+  pushes the label further than the plain edge-flip does, clear of the
+  quadrant label's own line. `dualMap()`'s "you" dot got the same
+  stroke-outline ring `dualMap()` already gave Holiday's dot, for the same
+  reason — a solid dot with no ring reads as part of whatever text it
+  happens to land near instead of a distinct marker.
 - `animateWords(node, text?, startDelay?)` — splits text into `.word-pop`
   spans with a staggered, overshoot-free entrance. Used for `.qtext`,
   `.verdict`, `.chtitle`, deck `.pull` quotes, and the cover/gate `.lede`.
@@ -431,7 +476,12 @@ would quietly change what the quiz is actually measuring. Historical
 references (Bowlby, Ainsworth's "his colleague") and the abstract "reaches
 → backs off" loop diagram (`loopSVG()`, generic "him"/"her" labels, used in
 the *educational* "the loop" chapter, not the personal "you two" chapter)
-are illustrative, not about him, and stay generic too.
+are illustrative, not about him, and stay generic too. (Its two circle
+labels are `text-anchor="middle"` centred on each circle's `cx` — they
+used to be manually-guessed left-aligned offsets, and "BACKS OFF" is just
+wide enough at that font-size to overflow past its circle's edge when
+left-aligned instead of centred. Centring is also the more robust choice
+if either label copy ever changes.)
 
 **`PAIRS{}` is keyed by `pairKey()` — sorted alphabetically, not "her key
 first."** Only 4 of the 10 entries ever render for this deployment, because
