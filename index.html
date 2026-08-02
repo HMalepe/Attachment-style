@@ -128,25 +128,27 @@ button{font-family:inherit;color:inherit;background:none;border:none;cursor:poin
   min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 .eyebrow{font-family:var(--label);font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
 
-/* ---------- the field: two roses, one thread ---------- */
-.field{position:relative;height:104px;margin:0 0 18px;flex:none}
+/* ---------- the field: two DNA-helix lockets, one thread ---------- */
+/* bumped from 104px — the helix locket (twist + medallion + initial)
+   needs a bit more room to read clearly than the old flat flower did */
+.field{position:relative;height:128px;margin:0 0 18px;flex:none}
 .field svg{width:100%;height:100%;overflow:visible;display:block}
 .tg-a{stop-color:var(--warm)}
 .tg-b{stop-color:var(--cool)}
-.bloom-a{--petal-1:var(--warm);--petal-2:var(--petal-rose-2);--petal-3:var(--petal-rose-3)}
-.bloom-b{--petal-1:var(--cool);--petal-2:var(--petal-sage-2);--petal-3:var(--petal-sage-3)}
+.bloom-a{--petal-1:var(--warm);--petal-2:var(--petal-rose-2);--petal-3:var(--petal-rose-3);--petal-ink:var(--warm-ink)}
+.bloom-b{--petal-1:var(--cool);--petal-2:var(--petal-sage-2);--petal-3:var(--petal-sage-3);--petal-ink:var(--cool-ink)}
 .bloom-halo{fill:none;stroke-width:.8;opacity:.32}
 .halo-a{stroke:var(--warm)}
 .halo-b{stroke:var(--cool)}
 
-/* decorative botanicals — soft, behind everything, never interactive */
+/* decorative DNA lockets — soft, behind everything, never interactive */
 .petal-field{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .petal-field svg{
   position:absolute;opacity:.30;filter:blur(1.5px);
-  --petal-1:var(--petal-soft-1);--petal-2:var(--petal-soft-2);--petal-3:var(--petal-soft-3);
+  --petal-1:var(--petal-soft-1);--petal-2:var(--petal-soft-2);--petal-3:var(--petal-soft-3);--petal-ink:var(--warm-ink);
 }
 .petal-field .p1{top:-58px;left:-56px;width:186px;transform:rotate(-18deg)}
-.petal-field .p2{top:34%;right:-64px;width:150px;transform:rotate(24deg);--petal-1:var(--petal-leaf-1);--petal-2:var(--petal-leaf-2);--petal-3:var(--petal-leaf-3)}
+.petal-field .p2{top:34%;right:-64px;width:150px;transform:rotate(24deg);--petal-1:var(--petal-leaf-1);--petal-2:var(--petal-leaf-2);--petal-3:var(--petal-leaf-3);--petal-ink:var(--cool-ink)}
 .petal-field .p3{bottom:-52px;left:-40px;width:168px;transform:rotate(8deg)}
 .orb-g{transition:transform 1.1s var(--ease)}
 .drift-a{animation:driftA 9s ease-in-out infinite;will-change:transform}
@@ -157,6 +159,20 @@ button{font-family:inherit;color:inherit;background:none;border:none;cursor:poin
 .thread-wrap{animation:hum 2.4s ease-in-out infinite;will-change:transform}
 @keyframes hum{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
 .field-cap{position:absolute;bottom:-2px;left:0;right:0;text-align:center}
+
+/* ---------- the finale: the same two helices, closing the distance ----------
+   Everywhere else the gap between #dna-h/#dna-g just ambiently tracks
+   compatibility (see paintField). Here, on the very last page, it gets
+   one deliberate, visible moment of closing that distance — see
+   initJoinReveal()/paintJoin() in the script. */
+.joinwrap{margin:26px 0 6px}
+.joinsvg{width:100%;max-width:260px;display:block;margin:0 auto;overflow:visible}
+.joincap{text-align:center;margin-top:8px}
+#joinA,#joinB{transition:transform 1.3s var(--ease)}
+#joinThread{transition:d 1.3s var(--ease), opacity 1.1s ease, stroke-width 1s ease}
+.join-halo{fill:none;stroke-width:.8;opacity:.32;transform-box:fill-box;transform-origin:center}
+.joinwrap.joined .join-halo{animation:joinPulse .9s var(--ease)}
+@keyframes joinPulse{0%{transform:scale(1);opacity:.32}40%{transform:scale(1.35);opacity:.6}100%{transform:scale(1);opacity:.32}}
 
 /* ---------- header ---------- */
 header{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:10px}
@@ -270,6 +286,27 @@ h1 em{
    overwritten by GUEST.name on load (see enterApp() in the script). */
 #gate h1 em{
   background:none;-webkit-background-clip:unset;background-clip:unset;color:var(--warm-ink);
+}
+/* nudged down from right under the h1 to closer to the code bar, now
+   that the "Holiday gave you a code" note is gone from between them —
+   scoped to the gate only so #coverLede is untouched. */
+.gate-lede{margin-top:18px;margin-bottom:8px}
+/* the tease: "put it in" sits shaded and out of focus, then comes into
+   focus on its own — the one word-level reveal on the page that isn't
+   the word-pop treatment, because it's a held blur-to-sharp rather than
+   a rise. Blur/opacity only ever get set inside the keyframe, never as
+   a base style on .gate-tease itself, so prefers-reduced-motion (which
+   strips the animation globally) leaves it sharp and readable from the
+   first frame instead of stuck blurred — same resilience .word-pop
+   already relies on. */
+.gate-tease{
+  display:inline-block;background:var(--blush);border-radius:.3em;padding:.02em .22em;
+  animation:gateTease 1.7s var(--ease) both;animation-delay:.9s;
+}
+@keyframes gateTease{
+  0%{filter:blur(9px);opacity:.42}
+  55%{filter:blur(3px);opacity:.72}
+  100%{filter:blur(0);opacity:1}
 }
 #gate h1 .gate-ellipsis{color:var(--warm-ink)}
 .gate-form{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:22px}
@@ -762,11 +799,11 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
 </head>
 <body>
 
-<!-- ══════════ soft botanicals, purely decorative ══════════ -->
+<!-- ══════════ soft DNA lockets, purely decorative ══════════ -->
 <div class="petal-field" aria-hidden="true">
-  <svg class="p1" viewBox="-32 -32 64 64"><use href="#rose"/></svg>
-  <svg class="p2" viewBox="-32 -32 64 64"><use href="#rose"/></svg>
-  <svg class="p3" viewBox="-32 -32 64 64"><use href="#rose"/></svg>
+  <svg class="p1" viewBox="-32 -32 64 64"><use href="#dna-h"/></svg>
+  <svg class="p2" viewBox="-32 -32 64 64"><use href="#dna-g"/></svg>
+  <svg class="p3" viewBox="-32 -32 64 64"><use href="#dna-h"/></svg>
 </div>
 
 <div class="wrap">
@@ -782,28 +819,55 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
         <linearGradient id="tg" x1="0" x2="1">
           <stop class="tg-a" offset="0%"/><stop class="tg-b" offset="100%"/>
         </linearGradient>
-        <!-- one rose bloom. Colours arrive as custom properties (--petal-1/2/3),
-             because plain CSS selectors cannot reach inside a <use> shadow tree
-             but inherited custom properties can. -->
-        <g id="rose">
-          <g fill="var(--petal-1,var(--warm))" opacity=".92">
-            <ellipse rx="7.4" ry="12.6" cy="-11"/>
-            <ellipse rx="7.4" ry="12.6" cy="-11" transform="rotate(60)"/>
-            <ellipse rx="7.4" ry="12.6" cy="-11" transform="rotate(120)"/>
-            <ellipse rx="7.4" ry="12.6" cy="-11" transform="rotate(180)"/>
-            <ellipse rx="7.4" ry="12.6" cy="-11" transform="rotate(240)"/>
-            <ellipse rx="7.4" ry="12.6" cy="-11" transform="rotate(300)"/>
+        <!-- two DNA-helix lockets standing in for two people: #dna-h is
+             Holiday's (fixed "H"), #dna-g is hers (initial injected at
+             load — see injectGuestInitial()). Colours arrive as custom
+             properties (--petal-1/2/3/ink), because plain CSS selectors
+             cannot reach inside a <use> shadow tree but inherited custom
+             properties can — but that inheritance only reaches attributes
+             set directly on the cloned geometry, not on a <linearGradient>
+             sitting separately in <defs>, so the "3D" shading here is
+             built from layered flat strokes (dark back strand, solid mid
+             strand, lighter offset sheen, thin glass highlight) instead
+             of a true gradient — a gradient's <stop> would silently
+             resolve the same way for every instance regardless of which
+             one referenced it. -->
+        <filter id="dnaShadow" x="-60%" y="-60%" width="220%" height="220%">
+          <feDropShadow dx="0" dy="1.2" stdDeviation="1.3" flood-color="var(--text)" flood-opacity=".28"/>
+        </filter>
+        <g id="dna-h">
+          <g filter="url(#dnaShadow)">
+            <path fill="none" stroke="var(--petal-ink,var(--warm-ink))" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" opacity=".6"
+                  d="M 0,-27 L -2.14,-25.88 L -4.19,-24.75 L -6.04,-23.63 L -7.6,-22.5 L -8.82,-21.38 L -9.62,-20.25 L -9.98,-19.13 L -9.88,-18 L -9.31,-16.88 L -8.31,-15.75 L -6.93,-14.63 L -5.22,-13.5 L -3.28,-12.38 L -1.18,-11.25 L 0.98,-10.13 L 3.09,-9 L 5.06,-7.88 L 6.79,-6.75 L 8.2,-5.63 L 9.24,-4.5 L 9.84,-3.38 L 9.99,-2.25 L 9.68,-1.13 L 8.91,0 L 7.73,1.13 L 6.19,2.25 L 4.36,3.38 L 2.33,4.5 L 0.2,5.63 L -1.95,6.75 L -4.01,7.88 L -5.88,9 L -7.48,10.13 L -8.72,11.25 L -9.57,12.38 L -9.97,13.5 L -9.91,14.63 L -9.38,15.75 L -8.42,16.88 L -7.07,18 L -5.39,19.13 L -3.46,20.25 L -1.37,21.38 L 0.78,22.5 L 2.9,23.63 L 4.89,24.75 L 6.64,25.88 L 8.09,27"/>
+            <line x1="-8" y1="5.63" x2="8" y2="5.63" stroke="var(--petal-2,var(--petal-rose-2))" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+            <path fill="none" stroke="var(--petal-1,var(--warm))" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"
+                  d="M 0,-27 L 2.14,-25.88 L 4.19,-24.75 L 6.04,-23.63 L 7.6,-22.5 L 8.82,-21.38 L 9.62,-20.25 L 9.98,-19.13 L 9.88,-18 L 9.31,-16.88 L 8.31,-15.75 L 6.93,-14.63 L 5.22,-13.5 L 3.28,-12.38 L 1.18,-11.25 L -0.98,-10.13 L -3.09,-9 L -5.06,-7.88 L -6.79,-6.75 L -8.2,-5.63 L -9.24,-4.5 L -9.84,-3.38 L -9.99,-2.25 L -9.68,-1.13 L -8.91,0 L -7.73,1.13 L -6.19,2.25 L -4.36,3.38 L -2.33,4.5 L -0.2,5.63 L 1.95,6.75 L 4.01,7.88 L 5.88,9 L 7.48,10.13 L 8.72,11.25 L 9.57,12.38 L 9.97,13.5 L 9.91,14.63 L 9.38,15.75 L 8.42,16.88 L 7.07,18 L 5.39,19.13 L 3.46,20.25 L 1.37,21.38 L -0.78,22.5 L -2.9,23.63 L -4.89,24.75 L -6.64,25.88 L -8.09,27"/>
+            <path fill="none" stroke="var(--petal-3,var(--petal-rose-3))" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".8" transform="translate(-1.3,-1.3) scale(.985)"
+                  d="M 0,-27 L 2.14,-25.88 L 4.19,-24.75 L 6.04,-23.63 L 7.6,-22.5 L 8.82,-21.38 L 9.62,-20.25 L 9.98,-19.13 L 9.88,-18 L 9.31,-16.88 L 8.31,-15.75 L 6.93,-14.63 L 5.22,-13.5 L 3.28,-12.38 L 1.18,-11.25 L -0.98,-10.13 L -3.09,-9 L -5.06,-7.88 L -6.79,-6.75 L -8.2,-5.63 L -9.24,-4.5 L -9.84,-3.38 L -9.99,-2.25 L -9.68,-1.13 L -8.91,0 L -7.73,1.13 L -6.19,2.25 L -4.36,3.38 L -2.33,4.5 L -0.2,5.63 L 1.95,6.75 L 4.01,7.88 L 5.88,9 L 7.48,10.13 L 8.72,11.25 L 9.57,12.38 L 9.97,13.5 L 9.91,14.63 L 9.38,15.75 L 8.42,16.88 L 7.07,18 L 5.39,19.13 L 3.46,20.25 L 1.37,21.38 L -0.78,22.5 L -2.9,23.63 L -4.89,24.75 L -6.64,25.88 L -8.09,27"/>
+            <path fill="none" stroke="var(--glass-hi)" stroke-width=".8" stroke-linecap="round" stroke-linejoin="round" opacity=".7" transform="translate(-1.7,-1.7) scale(.97)"
+                  d="M 0,-27 L 2.14,-25.88 L 4.19,-24.75 L 6.04,-23.63 L 7.6,-22.5 L 8.82,-21.38 L 9.62,-20.25 L 9.98,-19.13 L 9.88,-18 L 9.31,-16.88 L 8.31,-15.75 L 6.93,-14.63 L 5.22,-13.5 L 3.28,-12.38 L 1.18,-11.25 L -0.98,-10.13 L -3.09,-9 L -5.06,-7.88 L -6.79,-6.75 L -8.2,-5.63 L -9.24,-4.5 L -9.84,-3.38 L -9.99,-2.25 L -9.68,-1.13 L -8.91,0 L -7.73,1.13 L -6.19,2.25 L -4.36,3.38 L -2.33,4.5 L -0.2,5.63 L 1.95,6.75 L 4.01,7.88 L 5.88,9 L 7.48,10.13 L 8.72,11.25 L 9.57,12.38 L 9.97,13.5 L 9.91,14.63 L 9.38,15.75 L 8.42,16.88 L 7.07,18 L 5.39,19.13 L 3.46,20.25 L 1.37,21.38 L -0.78,22.5 L -2.9,23.63 L -4.89,24.75 L -6.64,25.88 L -8.09,27"/>
           </g>
-          <g fill="var(--petal-2,var(--petal-rose-2))">
-            <ellipse rx="5.2" ry="8.6" cy="-7" transform="rotate(30)"/>
-            <ellipse rx="5.2" ry="8.6" cy="-7" transform="rotate(90)"/>
-            <ellipse rx="5.2" ry="8.6" cy="-7" transform="rotate(150)"/>
-            <ellipse rx="5.2" ry="8.6" cy="-7" transform="rotate(210)"/>
-            <ellipse rx="5.2" ry="8.6" cy="-7" transform="rotate(270)"/>
-            <ellipse rx="5.2" ry="8.6" cy="-7" transform="rotate(330)"/>
+          <circle cx="0" cy="5.63" r="8.6" fill="var(--petal-3,var(--petal-rose-3))" stroke="var(--petal-2,var(--petal-rose-2))" stroke-width="1.1" filter="url(#dnaShadow)"/>
+          <circle cx="0" cy="5.63" r="8.6" fill="none" stroke="var(--petal-ink,var(--warm-ink))" stroke-width=".6" opacity=".25"/>
+          <circle cx="-2.7" cy="2.1" r="2.7" fill="var(--glass-hi)" opacity=".7"/>
+          <text x="0" y="9.1" text-anchor="middle" font-family="var(--display)" font-weight="700" font-size="10.5" fill="var(--petal-ink,var(--warm-ink))">H</text>
+        </g>
+        <g id="dna-g">
+          <g filter="url(#dnaShadow)">
+            <path fill="none" stroke="var(--petal-ink,var(--cool-ink))" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" opacity=".6"
+                  d="M 0,-27 L -2.14,-25.88 L -4.19,-24.75 L -6.04,-23.63 L -7.6,-22.5 L -8.82,-21.38 L -9.62,-20.25 L -9.98,-19.13 L -9.88,-18 L -9.31,-16.88 L -8.31,-15.75 L -6.93,-14.63 L -5.22,-13.5 L -3.28,-12.38 L -1.18,-11.25 L 0.98,-10.13 L 3.09,-9 L 5.06,-7.88 L 6.79,-6.75 L 8.2,-5.63 L 9.24,-4.5 L 9.84,-3.38 L 9.99,-2.25 L 9.68,-1.13 L 8.91,0 L 7.73,1.13 L 6.19,2.25 L 4.36,3.38 L 2.33,4.5 L 0.2,5.63 L -1.95,6.75 L -4.01,7.88 L -5.88,9 L -7.48,10.13 L -8.72,11.25 L -9.57,12.38 L -9.97,13.5 L -9.91,14.63 L -9.38,15.75 L -8.42,16.88 L -7.07,18 L -5.39,19.13 L -3.46,20.25 L -1.37,21.38 L 0.78,22.5 L 2.9,23.63 L 4.89,24.75 L 6.64,25.88 L 8.09,27"/>
+            <line x1="-8" y1="5.63" x2="8" y2="5.63" stroke="var(--petal-2,var(--petal-sage-2))" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+            <path fill="none" stroke="var(--petal-1,var(--cool))" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"
+                  d="M 0,-27 L 2.14,-25.88 L 4.19,-24.75 L 6.04,-23.63 L 7.6,-22.5 L 8.82,-21.38 L 9.62,-20.25 L 9.98,-19.13 L 9.88,-18 L 9.31,-16.88 L 8.31,-15.75 L 6.93,-14.63 L 5.22,-13.5 L 3.28,-12.38 L 1.18,-11.25 L -0.98,-10.13 L -3.09,-9 L -5.06,-7.88 L -6.79,-6.75 L -8.2,-5.63 L -9.24,-4.5 L -9.84,-3.38 L -9.99,-2.25 L -9.68,-1.13 L -8.91,0 L -7.73,1.13 L -6.19,2.25 L -4.36,3.38 L -2.33,4.5 L -0.2,5.63 L 1.95,6.75 L 4.01,7.88 L 5.88,9 L 7.48,10.13 L 8.72,11.25 L 9.57,12.38 L 9.97,13.5 L 9.91,14.63 L 9.38,15.75 L 8.42,16.88 L 7.07,18 L 5.39,19.13 L 3.46,20.25 L 1.37,21.38 L -0.78,22.5 L -2.9,23.63 L -4.89,24.75 L -6.64,25.88 L -8.09,27"/>
+            <path fill="none" stroke="var(--petal-3,var(--petal-sage-3))" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".8" transform="translate(-1.3,-1.3) scale(.985)"
+                  d="M 0,-27 L 2.14,-25.88 L 4.19,-24.75 L 6.04,-23.63 L 7.6,-22.5 L 8.82,-21.38 L 9.62,-20.25 L 9.98,-19.13 L 9.88,-18 L 9.31,-16.88 L 8.31,-15.75 L 6.93,-14.63 L 5.22,-13.5 L 3.28,-12.38 L 1.18,-11.25 L -0.98,-10.13 L -3.09,-9 L -5.06,-7.88 L -6.79,-6.75 L -8.2,-5.63 L -9.24,-4.5 L -9.84,-3.38 L -9.99,-2.25 L -9.68,-1.13 L -8.91,0 L -7.73,1.13 L -6.19,2.25 L -4.36,3.38 L -2.33,4.5 L -0.2,5.63 L 1.95,6.75 L 4.01,7.88 L 5.88,9 L 7.48,10.13 L 8.72,11.25 L 9.57,12.38 L 9.97,13.5 L 9.91,14.63 L 9.38,15.75 L 8.42,16.88 L 7.07,18 L 5.39,19.13 L 3.46,20.25 L 1.37,21.38 L -0.78,22.5 L -2.9,23.63 L -4.89,24.75 L -6.64,25.88 L -8.09,27"/>
+            <path fill="none" stroke="var(--glass-hi)" stroke-width=".8" stroke-linecap="round" stroke-linejoin="round" opacity=".7" transform="translate(-1.7,-1.7) scale(.97)"
+                  d="M 0,-27 L 2.14,-25.88 L 4.19,-24.75 L 6.04,-23.63 L 7.6,-22.5 L 8.82,-21.38 L 9.62,-20.25 L 9.98,-19.13 L 9.88,-18 L 9.31,-16.88 L 8.31,-15.75 L 6.93,-14.63 L 5.22,-13.5 L 3.28,-12.38 L 1.18,-11.25 L -0.98,-10.13 L -3.09,-9 L -5.06,-7.88 L -6.79,-6.75 L -8.2,-5.63 L -9.24,-4.5 L -9.84,-3.38 L -9.99,-2.25 L -9.68,-1.13 L -8.91,0 L -7.73,1.13 L -6.19,2.25 L -4.36,3.38 L -2.33,4.5 L -0.2,5.63 L 1.95,6.75 L 4.01,7.88 L 5.88,9 L 7.48,10.13 L 8.72,11.25 L 9.57,12.38 L 9.97,13.5 L 9.91,14.63 L 9.38,15.75 L 8.42,16.88 L 7.07,18 L 5.39,19.13 L 3.46,20.25 L 1.37,21.38 L -0.78,22.5 L -2.9,23.63 L -4.89,24.75 L -6.64,25.88 L -8.09,27"/>
           </g>
-          <path fill="none" stroke="var(--petal-3,var(--petal-rose-3))" stroke-width="1.5" stroke-linecap="round"
-                d="M0-5.4A5.4 5.4 0 1 1-4.7 2.7 3.3 3.3 0 1 0 .2-1.9"/>
+          <circle cx="0" cy="5.63" r="8.6" fill="var(--petal-3,var(--petal-sage-3))" stroke="var(--petal-2,var(--petal-sage-2))" stroke-width="1.1" filter="url(#dnaShadow)"/>
+          <circle cx="0" cy="5.63" r="8.6" fill="none" stroke="var(--petal-ink,var(--cool-ink))" stroke-width=".6" opacity=".25"/>
+          <circle cx="-2.7" cy="2.1" r="2.7" fill="var(--glass-hi)" opacity=".7"/>
+          <text id="dnaGuestLetter" x="0" y="9.1" text-anchor="middle" font-family="var(--display)" font-weight="700" font-size="10.5" fill="var(--petal-ink,var(--cool-ink))">B</text>
         </g>
       </defs>
       <g class="thread-wrap" id="threadWrap">
@@ -811,14 +875,14 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
       </g>
       <g class="orb-g" id="orbA" transform="translate(150,66)">
         <g class="drift-a">
-          <circle class="bloom-halo halo-a" r="25"/>
-          <use href="#rose" class="bloom bloom-a" filter="url(#glow)"/>
+          <circle class="bloom-halo halo-a" r="34"/>
+          <use href="#dna-h" class="bloom bloom-a" filter="url(#glow)" transform="scale(.6)"/>
         </g>
       </g>
       <g class="orb-g" id="orbB" transform="translate(250,66)">
         <g class="drift-b">
-          <circle class="bloom-halo halo-b" r="25"/>
-          <use href="#rose" class="bloom bloom-b" filter="url(#glow)"/>
+          <circle class="bloom-halo halo-b" r="34"/>
+          <use href="#dna-g" class="bloom bloom-b" filter="url(#glow)" transform="scale(.6)"/>
         </g>
       </g>
     </svg>
@@ -829,8 +893,7 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
   <div class="screen on" id="gate">
     <div class="gate-dots" aria-hidden="true"><span></span><span></span><span></span></div>
     <h1 class="rise d2">Hi, <em id="gateName">Bree</em><span class="gate-ellipsis">…</span></h1>
-    <p class="lede" id="gateLede">You know the code, now put it in.</p>
-    <p class="note rise d4">Holiday gave you a code. Type it in and we'll get going.</p>
+    <p class="lede gate-lede" id="gateLede">You know the code, now put it in.</p>
 
     <form class="gate-form rise d4" id="gateForm" autocomplete="off">
       <input type="text" id="gateCode" class="code-input" placeholder="the code"
@@ -838,8 +901,6 @@ body[data-screen="quiz"] .wrap,body[data-screen="deck"] .wrap{height:100vh;heigh
       <button type="submit" class="cta">let's go <span class="arw">→</span></button>
     </form>
     <p class="gate-msg" id="gateMsg" aria-live="polite"></p>
-
-    <p class="note rise d5">The code gets checked against a server, but that's all it sends — nothing here is saved or logged. Ska wara.</p>
   </div>
 
   <!-- ══════════ COVER ══════════ -->
@@ -1674,8 +1735,16 @@ function journeyPages(){
       <p><b>One.</b> Don't use this as a label — on Holiday or on yourself. “That's just my attachment style” is the fastest way to turn a useful description into an excuse. It's a starting point, not a ceiling.</p>
       <p><b>Two.</b> When the loop turns up — and it will — say so out loud instead of trying to win the argument you're having. For you two specifically, the first move is: <em>${pr.fix[0].replace(/<\/?b>/g,'')}</em></p>` },
 
-    { eyebrow:"the ask", html:`
+    { eyebrow:"the ask", onShow:initJoinReveal, html:`
       <div class="pull">Holiday told you what he is before you asked. Least he can do is find out what you'd need.</div>
+      <div class="joinwrap" id="joinWrap" aria-hidden="true">
+        <svg class="joinsvg" viewBox="0 0 300 150">
+          <g class="thread-wrap"><path id="joinThread" fill="none" stroke="url(#tg)" stroke-width="1.6" stroke-linecap="round"/></g>
+          <g id="joinA"><circle class="join-halo halo-a" r="34"/><use href="#dna-h" class="bloom bloom-a" filter="url(#glow)"/></g>
+          <g id="joinB"><circle class="join-halo halo-b" r="34"/><use href="#dna-g" class="bloom bloom-b" filter="url(#glow)"/></g>
+        </svg>
+        <p class="joincap eyebrow" id="joinCap"></p>
+      </div>
       <p>That's everything. You now know Holiday's coordinate, yours, where both came from, and the exact loop you're most likely to fall into — which is a rare place to start from. Most people get this information by hurting each other for two years first.</p>
       <p class="small" style="margin-top:18px">And one last time, because it matters: none of this was stored or logged anywhere. Your eighteen answers ran entirely on your phone. The only thing that ever left it, if you wrote in the free-text box, was that note along with your picks and your result — sent once to get a reflection that actually spoke to what you got, then discarded, nowhere else. The only copy of any of this that exists is the one you choose to send.</p>
       <div class="chnav" style="border:none;margin-top:20px;padding-top:0">
@@ -1765,23 +1834,72 @@ function decodeAnswers(str){
   return { ok:true, answers: out };
 }
 
-/* ── the field: two roses. distance = holding back, thread = worry ── */
+/* ── the field: two DNA lockets (H, and her), distance = compatibility ──
+   This used to plot HER OWN two axes — the two blooms were both about
+   her, distance = her avoidance, thread = her anxiety. Now that each
+   locket carries an initial and stands for an actual person, the field
+   plots the two of them against each other instead: distance = how
+   differently you each keep back, thread tension = how differently you
+   each worry. It's live throughout the quiz (every partial answer set
+   nudges her point, so the gap breathes as she goes) and settles onto
+   her real numbers once she's done — see finish(). */
+function compatDelta(anx, avo){
+  return { avo: Math.abs(avo - FOUNDER.avo), anx: Math.abs(anx - FOUNDER.anx) };
+}
 function paintField(anx, avo, settled){
-  const gap  = 52 + (avo/100)*104;
+  const d = compatDelta(anx, avo);
+  const gap  = 52 + (d.avo/100)*104;
   const ax_ = 200 - gap/2, bx = 200 + gap/2;
   el('orbA').setAttribute('transform', `translate(${ax_},66)`);
   el('orbB').setAttribute('transform', `translate(${bx},66)`);
 
-  const slack = (1 - anx/100) * 26;
+  const slack = (1 - d.anx/100) * 26;
   const th = el('thread');
   th.setAttribute('d', `M ${ax_} 66 Q 200 ${66+slack} ${bx} 66`);
-  th.setAttribute('stroke-width', (1.2 + (anx/100)*2.4).toFixed(2));
-  th.style.opacity = 0.5 + (anx/100)*0.45;
-  el('threadWrap').style.animationDuration = (2.9 - (anx/100)*2.1).toFixed(2) + 's';
+  th.setAttribute('stroke-width', (1.2 + (d.anx/100)*2.4).toFixed(2));
+  th.style.opacity = 0.5 + (d.anx/100)*0.45;
+  el('threadWrap').style.animationDuration = (2.9 - (d.anx/100)*2.1).toFixed(2) + 's';
 
   el('fieldCap').textContent = settled
-    ? `${avo} apart · ${anx} pull`
+    ? `${d.avo} apart · ${d.anx} pull`
     : (answers.filter(a=>a!==null).length ? 'reading you' : 'two people, one thread');
+}
+
+/* ── the finale: the field's same two lockets, deliberately closing the
+   gap. Everywhere else the distance just ambiently tracks compatibility
+   as she answers — here, on the very last page, it gets one clear,
+   visible moment of the two of you actually closing it. paintJoin(joined)
+   sets the SVG the same way paintField does (attribute-driven, transition
+   lives in CSS on #joinA/#joinB/#joinThread), so under
+   prefers-reduced-motion — where the site-wide rule strips all
+   transitions — this still lands correctly, just instantly instead of
+   eased, rather than getting stuck mid-approach. ── */
+function paintJoin(deltaAvo, deltaAnx, joined){
+  const gap = joined ? 14 : 46 + (deltaAvo/100)*96;
+  const ax_ = 150 - gap/2, bx = 150 + gap/2;
+  el('joinA').setAttribute('transform', `translate(${ax_},75)`);
+  el('joinB').setAttribute('transform', `translate(${bx},75)`);
+
+  const slack = joined ? 0 : (1 - deltaAnx/100) * 20;
+  const th = el('joinThread');
+  th.setAttribute('d', `M ${ax_} 75 Q 150 ${75+slack} ${bx} 75`);
+  th.setAttribute('stroke-width', joined ? '2.8' : (1.3 + (deltaAnx/100)*2).toFixed(2));
+  th.style.opacity = joined ? .95 : (0.5 + (deltaAnx/100)*0.4);
+
+  el('joinCap').textContent = joined
+    ? 'together, if you want to be'
+    : `${deltaAvo} apart from Holiday · ${deltaAnx} different on worry`;
+  el('joinWrap').classList.toggle('joined', !!joined);
+}
+function initJoinReveal(){
+  const d = compatDelta(RESULT.anx, RESULT.avo);
+  clearTimeout(initJoinReveal._t);
+  paintJoin(d.avo, d.anx, false);
+  // a beat to read the starting distance, then close it — same "let her
+  // see the before, not just the after" reasoning as the quiz's
+  // no-auto-advance rule, just compressed to a couple of seconds instead
+  // of applying to the whole page.
+  initJoinReveal._t = setTimeout(() => paintJoin(d.avo, d.anx, true), 900);
 }
 
 /* ── the quadrant grid ── */
@@ -2197,6 +2315,12 @@ paintField(0, 0, false);
    happens right after the code is accepted. See GUEST up top for what
    this gate can and can't do. ── */
 el('gateName').textContent = GUEST.name;
+// #dna-g is a <g> in <defs>, reused everywhere via <use> — mutating its
+// <text> here updates every instance at once (see the field/petal-field
+// markup), the same live-inheritance trick the rest of the DNA symbol
+// already leans on for colour. Falls back to "B" (the literal element
+// already has that as a static default) if GUEST.name is ever empty.
+if (GUEST.name && GUEST.name.trim()) el('dnaGuestLetter').textContent = GUEST.name.trim()[0].toUpperCase();
 // static, one-time screens still get the word-flow treatment now —
 // see the .word-pop CLAUDE.md note for why this used to be reserved
 // for text that changes on every render, and why that rule was dropped.
@@ -2204,6 +2328,26 @@ el('gateName').textContent = GUEST.name;
 // elements around it are still using, so it doesn't pop in before the
 // headline above it does.
 animateWords(el('gateLede'), undefined, 4.5);
+// animateWords() just wiped and rebuilt #gateLede as plain word-pop
+// spans, so the "put it in" tease (.gate-tease/@keyframes gateTease)
+// can't live in the template — it'd get destroyed on every load. Stitch
+// it on after the fact instead: grab the last three word-pop spans
+// ("put", "it", "in.") plus the space text nodes between/after them and
+// re-parent all of it into one wrapper, so the blush highlight reads as
+// one continuous phrase rather than three separate pills with gaps at
+// the spaces. Position-based (last three words), not text-matched, so
+// a future copy tweak still tastefully tags whatever the sentence ends
+// on instead of silently doing nothing.
+(function teaseGateLede(){
+  const words = [...el('gateLede').childNodes].filter(n => n.nodeType===1 && n.classList.contains('word-pop'));
+  if (words.length < 3) return;
+  const wrap = document.createElement('span');
+  wrap.className = 'gate-tease';
+  const start = words[words.length-3];
+  start.parentNode.insertBefore(wrap, start);
+  let node = wrap.nextSibling;
+  while (node){ const next = node.nextSibling; wrap.appendChild(node); node = next; }
+})();
 
 function enterApp(){
   animateWords(el('coverLede'), undefined, 4.5);

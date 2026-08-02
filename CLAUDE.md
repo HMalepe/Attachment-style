@@ -22,19 +22,29 @@ them are likely to do to each other.
   propose it and stop — don't implement it.
 - **No network calls at runtime, except two, and only one is opt-in.** No
   analytics, no telemetry, no fonts beyond the existing Google Fonts
-  `@import`, no CDN scripts. The privacy claim in the copy must stay
-  literally true — which is why it was rewritten to describe the two real
-  exceptions instead of pretending they don't exist:
+  `@import`, no CDN scripts. What actually happens, for reference:
   **getting past the gate sends the code she types to `/api/gate` to check
   it — no personal data, just the code, every time the page loads. Beyond
   that: if she uses the optional "in your own words" box, that text is sent
   once, at the end, to `/api/reflect` to generate a short Claude reflection,
   then discarded — nothing is stored on either end.** If she never touches
-  that box, nothing else ever leaves her phone. This was a deliberate
-  call after real back-and-forth about it (see git history around the
-  reflection feature and the gate) — don't quietly expand what either
-  endpoint does (e.g. logging notes, persisting results, adding other AI
-  calls) without
+  that box, nothing else ever leaves her phone.
+  **The on-screen copy no longer states the gate half of this.** The
+  gate used to close with a note disclosing that its code check hits a
+  server — removed at the guest-owner's explicit request (he was told,
+  in so many words, that this was the only on-screen disclosure of that
+  call and chose to cut it anyway). The mechanism didn't change, only
+  the disclosure did, which means the cover page's existing "nothing
+  ever leaves your phone at all" line (if she skips the notes box) is
+  now an unqualified claim standing alone, with nothing upstream telling
+  her about the gate call she already went through to get there. Known,
+  deliberate, not a bug — but if the privacy copy gets touched again,
+  don't assume it's still fully accurate just because it reads clean;
+  check it against what the two endpoints actually do, same as always.
+  This was a deliberate call after real back-and-forth about it (see git
+  history around the reflection feature and the gate) — don't quietly
+  expand what either endpoint does (e.g. logging notes, persisting
+  results, adding other AI calls) without
   the same level of scrutiny; the whole point was informed consent, not
   "well, the door's already open." The per-question photos are real images
   but ship as base64 inside `index.html`, not fetched — that one stays a
@@ -74,13 +84,32 @@ like a SaaS onboarding flow, it is wrong.
   dark colour — the name is historical. Five soft radial washes in blush,
   peach, sage and rose sit over it, plus a slow aurora drift and a very low
   opacity paper grain (`.05` — any higher reads as dirt on a light ground).
-- **Roses.** One inline `<g id="rose">` symbol, reused via `<use>`. The two
-  drifting blooms in `.field` are the signature: distance = avoidance,
-  thread tension = anxiety. Decorative blooms live in `.petal-field`
-  (fixed, `overflow:hidden`, `pointer-events:none`).
-  **Colour them with custom properties** (`--petal-1/2/3`) — ordinary CSS
-  selectors cannot reach inside a `<use>` shadow tree, but inherited custom
-  properties can. Selector-based fills silently render black.
+- **The two DNA lockets.** Two inline symbols, `<g id="dna-h">` (Holiday,
+  fixed initial "H") and `<g id="dna-g">` (her — a `<text id="dnaGuestLetter">`
+  inside it gets overwritten with `GUEST.name`'s first letter at load, see
+  `injectGuestInitial` in the script), each reused everywhere via `<use>`.
+  This used to be one shared `<g id="rose">` flower, recoloured per instance —
+  replaced because the brief changed to "these represent two actual people,
+  each carrying an initial," and a `<use>`-shared symbol can't vary its own
+  text content per instance the way it can vary colour. The two drifting
+  lockets in `.field` are the signature: distance = how differently you two
+  keep back, thread tension = how differently you two worry — see
+  `compatDelta()`/`paintField()`. Decorative lockets live in `.petal-field`
+  (fixed, `overflow:hidden`, `pointer-events:none`) — `p1`/`p3` use `dna-h`,
+  `p2` uses `dna-g`, matching the same warm/cool split as the header field.
+  **Colour them with custom properties** (`--petal-1/2/3/ink`) — ordinary
+  CSS selectors cannot reach inside a `<use>` shadow tree, but inherited
+  custom properties can, PROVIDED they're read directly off the cloned
+  geometry (`fill="var(--petal-1)"` on a path/circle/text). A `<linearGradient>`
+  sitting in `<defs>` does **not** get this treatment — its `<stop>` isn't
+  part of the `<use>` instance tree, so a `var()` inside it resolves off the
+  gradient's own (fixed) position in the light DOM and renders identically
+  for every instance that references it, silently breaking the "warm vs
+  cool" recolouring. That's why the helix's "3D" shading is built from
+  layered flat strokes (a dim `--petal-ink` back strand, a solid
+  `--petal-1` front strand, a lighter `--petal-3` offset sheen, a thin
+  `--glass-hi` highlight) instead of a true gradient. Selector-based fills
+  (instead of custom properties) silently render black either way.
 - **Soft glass on cream.** Translucent white fills, warm hairline borders,
   generous radii, and shadows tinted warm brown — never black.
 - **Per-question photos (`.qimg`).** A real photo sits in a rounded card
@@ -279,13 +308,40 @@ the front door of the same book, not a separate product.
   purely decorative — lifted from a design reference, nothing is
   actually loading — and gets killed along with every other animation
   by the site-wide `prefers-reduced-motion` block, same as everything
-  else. The gate's server-check note ends with "Ska wara." — Sepedi for
-  "don't worry" — a small, deliberate personal touch on the one line that's
-  explaining the gate's one real network call; keep it if that line's
-  copy changes again. The "before we start" eyebrow that used to sit above
+  else. The gate used to close with a note explaining its one real
+  network call, ending "Ska wara." — Sepedi for "don't worry" — a small,
+  deliberate personal touch. That whole note (Ska wara included) was cut
+  at the guest-owner's explicit request — see the network-calls bullet up
+  top for what that trades away. If a similar closing note ever comes
+  back here, "Ska wara." earns its place back on it too. The "before we
+  start" eyebrow that used to sit above
   the gate's `<h1>` was cut entirely (not replaced) — the gate is the front
   door of the book, and a chrome label above the very first thing she reads
-  worked against that, not for it. The actual code
+  worked against that, not for it. The middle note ("Holiday gave you a
+  code…") between the lede and the form was cut the same way — the lede
+  already says as much, and with it gone `.gate-lede` (scoped to the gate
+  only, `#coverLede` is untouched) nudges the lede down a little and pulls
+  it closer to the code bar instead of leaving a gap where the note used
+  to sit. In its place, "put it in" gets its own small reveal: a blush
+  `.gate-tease` chip that opens out of a heavy blur into focus
+  (`@keyframes gateTease`) rather than sliding in like everything else —
+  the one deliberately different entrance on the page, for the one
+  deliberately suggestive phrase. It can't just be a `<span>` sitting in
+  the template, though — `animateWords(el('gateLede'), ...)` (a few lines
+  below) reads `textContent` and rebuilds the whole lede as plain
+  word-pop spans, which would silently flatten and destroy any markup
+  already inside it. So the tease gets stitched on *after* that call
+  instead: grab the last three word-pop spans plus the space text nodes
+  between/after them and re-parent them all into one wrapper, so the
+  highlight reads as one continuous phrase rather than three separate
+  pills with gaps at the spaces. Position-based (last three words), not
+  text-matched against "put"/"it"/"in" specifically — a future copy edit
+  still tastefully tags whatever the sentence ends on instead of quietly
+  doing nothing. Like `.word-pop` and `.gate-dots`, `.gate-tease` only
+  ever sets `filter`/`opacity` inside the keyframe, never as a base
+  style, so the site-wide `prefers-reduced-motion` block (which strips
+  the animation) leaves it sharp and readable from the first frame
+  instead of stuck mid-blur. The actual code
   and the kill switch both live server-side now, in `api/gate.js`, driven
   entirely by the `GATE_CODE` / `GATE_ACTIVE` environment variables. This
   used to be `GUEST{name, code, active}` with the code hardcoded here and
@@ -347,7 +403,23 @@ the front door of the same book, not a separate product.
   regardless of selector specificity, so without that override, toggling
   the `hidden` attribute in `renderOther()` silently stops hiding the
   button at all (it did, briefly, while building this).
-- `paintField()` — drives the signature two-rose visual.
+- `compatDelta(anx, avo)` / `paintField()` — drives the signature two-locket
+  visual. Takes whatever point is passed in (her live, partial `tally()`
+  during the quiz; her final `RESULT` once she's done) and diffs it against
+  `FOUNDER`'s fixed coordinate — that delta, not her raw score, is what
+  drives the gap and thread tension now. `paintJoin()` / `initJoinReveal()`
+  (near `paintField()`) are the one-off finale version of the same idea: a
+  second, bigger `#joinA`/`#joinB`/`#joinThread` on the very last page,
+  driven by her final `RESULT` instead of the live tally, that starts at
+  the real distance and then — after a short `setTimeout`, purely so she
+  sees the "before" and not just the "after" — closes it. It reuses
+  `paintField()`'s exact technique (set the SVG attributes directly, let a
+  CSS `transition` on `#joinA`/`#joinB`/`#joinThread` ease between the two
+  calls) rather than a keyframe animation, specifically so the site-wide
+  `prefers-reduced-motion` rule (which strips all `transition`s) makes it
+  land instantly in the correct joined state instead of getting stuck
+  mid-approach — the same resilience the `.reveal` scroll-reveal class
+  already relies on.
 - `soloMap()` / `dualMap()` / `gridBase()` — the quadrant grid. Worry grows
   *downward* (`py`), because ANXIOUS and BOTH are the lower two corners.
   `soloMap()` (the "your two numbers" page) labels the coordinate `YOU`
