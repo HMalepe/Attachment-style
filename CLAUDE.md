@@ -112,12 +112,15 @@ like a SaaS onboarding flow, it is wrong.
   (instead of custom properties) silently render black either way.
 - **Soft glass on cream.** Translucent white fills, warm hairline borders,
   generous radii, and shadows tinted warm brown — never black.
-- **Per-question photos (`.qimg`).** A real photo sits in a rounded card
-  above every question, cross-fading via a slow Ken Burns drift. It scrims
-  to cream at the bottom edge so `.qtext` below it never loses contrast —
-  don't remove that gradient, and don't let the card grow tall enough to
-  crowd the options off a small phone screen (`clamp()` keeps it responsive
-  to viewport height already; adjust the clamp, not a fixed height).
+- **Per-question photos (`.qimg`).** A real photo sits in a rounded 3:2
+  card above every question (aspect-matched to the encodes so the full
+  scene sits in frame at rest — no hard crop). A slow `qimgLife`
+  move-in / move-out gives it a little life; `restartQimg()` restarts
+  the cycle on every new question. It scrims lightly to cream at the
+  bottom edge so `.qtext` below it never loses contrast — don't remove
+  that gradient. Height is capped with `max-height` *and* a matching
+  `max-width` so a short phone shrinks the whole 3:2 frame instead of
+  squashing it into a crop; don't swap that for a fixed height.
 - **Word-pop text.** `.qtext`, `.verdict`, `.chtitle`, `.pull` quotes, and the
   cover/gate `.lede` all reveal word-by-word — the "in your face" gimmick,
   now used everywhere rather than only on text that changes every render
@@ -221,8 +224,9 @@ the front door of the same book, not a separate product.
   `transform` (`transform-box:fill-box` so it scales around the dot, not
   the SVG viewport) instead of animating the SVG `r` attribute. The
   handful of animations that run for the entire session — the aurora
-  drift, the two field roses, the thread hum, the per-question Ken Burns
-  image — carry `will-change:transform` so they're promoted to their own
+  drift, the two field lockets, the thread hum, the per-question
+  `qimgLife` move-in/out — carry `will-change:transform` so they're
+  promoted to their own
   layer immediately instead of the browser discovering that mid-scroll.
   Don't add `will-change` to one-off hover/press effects; that just wastes
   memory for something that's idle 99% of the time.
@@ -256,34 +260,24 @@ the front door of the same book, not a separate product.
   repo. See `assets/process_images.py` for how to regenerate one —
   `index.html` is still the one file that matters at runtime; everything
   in `assets/` is tooling, not shipped.
-  **`WIDTH=1200` / `QUALITY=78`** (bumped up from an original 640/50 that
-  looked genuinely soft on a retina phone screen — a real bug report, not
-  a nitpick). Total payload for all 18 is ~1.9MB before base64, ~2.5MB
-  after — that's most of `index.html`'s size, and a deliberate trade-off:
+  **`WIDTH=1600` / `QUALITY=92`** (bumped from an earlier 1200/78, itself
+  up from an original 640/50 that looked genuinely soft on a retina
+  phone — a real bug report, not a nitpick). Total payload for all 18
+  is ~3.8MB before base64, ~5MB after — that's most of `index.html`'s
+  size, and a deliberate trade-off for the taller 3:2 `.qimg` frame:
   don't "optimize" it back down without checking on an actual phone
   first, softness here reads as "cheap," which undercuts the whole point
   of a nicely-designed personal thing. If you ever need to claw the
   payload back down, drop `WIDTH` before you drop `QUALITY` — resolution
   is what reads as sharp on a retina screen, quality mostly just adds
   JPEG artifacting in flat areas.
-  **Resolution isn't the only thing that reads as "low quality" — exposure
-  is.** Q16 (the "he's in a bad mood" door photo) measured ~90% near-black
-  pixels; in the small `.qimg` crop it rendered as an almost solid black
-  rectangle with the bottom-scrim gradient over it, which reads as "this
-  broke" rather than "this is moody," even though the source file itself
-  was a perfectly sharp 1200×800 JPEG. Checked every image's mean
-  brightness and dark-pixel % (`ImageStat.Stat`) rather than trusting a
-  glance — Q9 and Q5 are also dark (sunset street, lamplit nightstand) but
-  have real midtone/colour detail throughout, so they read as intentional
-  mood, not a rendering failure; only Q16 (and Q18, a candle in near-total
-  black, left alone since the flame is the whole point of that shot and
-  is already the crop's focal point) were true outliers. Fixed Q16 with a
-  gamma lift (`im.point()`, γ≈1.9) plus a small contrast/saturation bump
-  to counter the flatness a shadow-lift causes, re-encoded at the same
-  JPEG quality — not a resize, so it's still base64-swapped into the same
-  `QIMG[15]` slot. No PNG source existed to redo this from scratch (see
-  above), so this was a levels adjustment on the shipped JPEG itself, done
-  once and checked visually before/after rather than applied blindly.
+  **Cropping used to be the bigger "blurry" complaint than encode size.**
+  The old `.qimg` was only `clamp(84px,22vh,148px)` tall with a Ken Burns
+  that started already at `scale(1.06)` and pushed to `1.15` — so faces
+  were hard-cropped and the motion made it worse. Fixed by matching the
+  card to the 3:2 encodes, capping height *and* width together, and
+  replacing the aggressive Ken Burns with a gentler 20s `qimgLife`
+  (peak zoom ~1.055) that `restartQimg()` resets on every question.
 - `P{}` — the four style profiles. Copy lives here.
 - `PAIRS{}` — 10 pairwise dynamics, keyed by `pairKey()` (sorted, pipe-joined).
 - `GUT[]` — the rotating gut-check line shown under every question.
