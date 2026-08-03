@@ -29,18 +29,18 @@ them are likely to do to each other.
   once, at the end, to `/api/reflect` to generate a short Claude reflection,
   then discarded — nothing is stored on either end.** If she never touches
   that box, nothing else ever leaves her phone.
-  **The on-screen copy no longer states the gate half of this.** The
+  **The on-screen copy no longer states the gate half of this, and the
+  cover no longer carries the reflection/privacy paragraph either.** The
   gate used to close with a note disclosing that its code check hits a
-  server — removed at the guest-owner's explicit request (he was told,
-  in so many words, that this was the only on-screen disclosure of that
-  call and chose to cut it anyway). The mechanism didn't change, only
-  the disclosure did, which means the cover page's existing "nothing
-  ever leaves your phone at all" line (if she skips the notes box) is
-  now an unqualified claim standing alone, with nothing upstream telling
-  her about the gate call she already went through to get there. Known,
-  deliberate, not a bug — but if the privacy copy gets touched again,
-  don't assume it's still fully accurate just because it reads clean;
-  check it against what the two endpoints actually do, same as always.
+  server — removed at the guest-owner's explicit request. The cover's
+  "Your answers stay on your phone…" block (which disclosed the optional
+  `/api/reflect` call) was cut the same way, later, from a marked-up
+  screenshot. The only remaining on-screen disclosure of what leaves her
+  phone is the closing "the ask" page. The mechanism didn't change, only
+  the disclosures did. Known, deliberate, not a bug — but if the privacy
+  copy gets touched again, don't assume it's still fully accurate just
+  because it reads clean; check it against what the two endpoints
+  actually do, same as always.
   This was a deliberate call after real back-and-forth about it (see git
   history around the reflection feature and the gate) — don't quietly
   expand what either endpoint does (e.g. logging notes, persisting
@@ -493,18 +493,24 @@ the front door of the same book, not a separate product.
   stateless by design, don't add a database behind it.
 - **The PDF export** — `downloadPdf()` (wired to the "download the pdf"
   button on the "yours to keep" page, inside `fillShare()`) builds one
-  plain HTML document out of the current `DECK` via `buildPrintHtml()` /
-  `buildPrintPageHtml()`, drops it into the hidden `#printView`, and calls
-  `window.print()` — the browser's own print-to-PDF, no library, no
-  network, no server. Two things get special-cased rather than reused
-  as-is: the "yours to keep" page (its live textareas/buttons mean nothing
-  on paper, so it's swapped for the plain-text `SUMMARY`) and the
-  reflection box (frozen at whatever `reflectionState` has settled to by
-  click time — never ships the "still thinking" placeholder). Every other
-  page's `id="..."` attributes get stripped before insertion so they can't
-  collide with the live, on-screen copies of the same ids. If you add a
-  page type to the deck, no special handling is needed unless it has its
-  own interactive-only markup like the share page does.
+  colourful HTML document out of the current `DECK` via `buildPrintHtml()` /
+  `buildPrintPageHtml()`, paints it into `#printView`, adds
+  `body.is-printing` so the rebuild is actually visible *before*
+  `window.print()` runs (printing a still-`display:none` box was what
+  produced blank pages in Chrome/Safari print preview), then opens the
+  browser's own print-to-PDF — no library, no network, no server. Opens
+  with a cover that says **for {GUEST.name} only**. Two deck pages get
+  special-cased rather than reused as-is: the "yours to keep" page (its
+  live textareas/buttons mean nothing on paper, so it's swapped for the
+  plain-text `SUMMARY`) and the reflection box (frozen at whatever
+  `reflectionState` has settled to by click time — never ships the
+  "still thinking" placeholder). Every other page's `id="..."` attributes
+  get stripped before insertion so they can't collide with the live,
+  on-screen copies of the same ids. Print CSS keeps the cream ground and
+  accent colours; never blanket-force `background:transparent` on
+  `#printView *` — that was the other half of the blank/washed-out bug.
+  If you add a page type to the deck, no special handling is needed
+  unless it has its own interactive-only markup like the share page does.
 - `encodeAnswers()` / `decodeAnswers()` — pack/unpack the answer array into
   a version-tagged (`HASH_VERSION`), URL-safe base64 string for the
   shareable-link feature. Each question packs as a 4-bit option bitmask
@@ -595,6 +601,6 @@ quietly ruins her own result. Never drop that nudge.
    dependencies anywhere, including in `api/reflect.js`.
 2. Confirm keyboard nav and focus rings still work.
 3. If you touched anything that sends data anywhere, confirm the on-screen
-   privacy copy (cover screen, closing "the ask" page) still describes
-   reality exactly — not "close enough."
+   privacy copy (closing "the ask" page — the cover no longer carries it)
+   still describes reality exactly — not "close enough."
 4. Report what you changed and what you deliberately didn't.
