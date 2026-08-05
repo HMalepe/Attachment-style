@@ -29,18 +29,26 @@ them are likely to do to each other.
   once, at the end, to `/api/reflect` to generate a short Claude reflection,
   then discarded — nothing is stored on either end.** If she never touches
   that box, nothing else ever leaves her phone.
-  **The on-screen copy no longer states the gate half of this, and the
-  cover no longer carries the reflection/privacy paragraph either.** The
-  gate used to close with a note disclosing that its code check hits a
-  server — removed at the guest-owner's explicit request. The cover's
-  "Your answers stay on your phone…" block (which disclosed the optional
-  `/api/reflect` call) was cut the same way, later, from a marked-up
-  screenshot. The only remaining on-screen disclosure of what leaves her
-  phone is the closing "the ask" page. The mechanism didn't change, only
-  the disclosures did. Known, deliberate, not a bug — but if the privacy
-  copy gets touched again, don't assume it's still fully accurate just
-  because it reads clean; check it against what the two endpoints
-  actually do, same as always.
+  **Neither the gate nor the cover carries a privacy note any more; the
+  closing "the ask" page is the only place either call is disclosed on
+  screen.** The gate used to close with a note disclosing that its code
+  check hits a server — removed at the guest-owner's explicit request.
+  The cover's "Your answers stay on your phone…" block (which disclosed
+  the optional `/api/reflect` call) was cut the same way, later, from a
+  marked-up screenshot. Neither is coming back.
+  What *did* have to change is the closing page's paragraph
+  (`.ask-privacy`). For a while it read "the only thing that ever left
+  it… was that note" — which quietly stopped being true the moment the
+  gate check moved server-side, because the code she types goes to
+  `/api/gate` on every single page load, before anything else happens.
+  It now names both calls: the code at the door, and the opt-in
+  reflection. That is the whole of it — `api/gate.js` compares and
+  discards, `api/reflect.js` caps, forwards and discards, neither
+  persists or logs anything about her. Exactly the failure mode the
+  paragraph below warns about, found by reading the endpoints instead of
+  the copy: **if the privacy copy gets touched again, don't assume it's
+  still accurate just because it reads clean; check it against what the
+  two endpoints actually do, same as always.**
   This was a deliberate call after real back-and-forth about it (see git
   history around the reflection feature and the gate) — don't quietly
   expand what either endpoint does (e.g. logging notes, persisting
